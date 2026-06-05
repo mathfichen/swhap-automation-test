@@ -25,6 +25,12 @@ set -euo pipefail
 REPO_URL="https://github.com/SoftwareHeritage/Wild_Life-swhap.git"
 MAIN_PIN="1571ce554b575ddacb750fa8135d6df4841d0090"  # published main tip, 2026-06-05
 PR1_PIN="5e05003011fc42ec21f0a386a876b85e4783d13a"   # PR #1 head: raw_materials/Life1.02Ultrix.tar
+# SourceCode tip: the 3-commit (one-per-release, NO tags) reconstructed history.
+# Its release trees are the TF gate ORACLE (real-tree vs real-manifest); the
+# published v0.91/v1.0 trees carry the previous-version leak the validator must
+# catch (C4 / followup-2). Release->commit mapping is BY COMMIT MESSAGE
+# ("Wild_LIFE <ver>") because the published exemplar ships no annotated tags.
+SC_PIN="24051137387e57d0bcd419e37fa1dba90d88c0eb"     # SourceCode tip (Wild_LIFE 1.0 commit)
 
 # Published checksums (metadata/checksums.sha256 at MAIN_PIN):
 LIFE_090_SHA="928453daa1ae1477113f323b2d98d3920d15999d8ed7d496f0b606598592df19"
@@ -51,26 +57,41 @@ git -C "$WORK/repo.git" cat-file -e "${MAIN_PIN}^{commit}" \
   || die "pinned main commit $MAIN_PIN not found upstream"
 git -C "$WORK/repo.git" cat-file -e "${PR1_PIN}^{commit}" \
   || die "pinned PR #1 commit $PR1_PIN not found upstream"
+git -C "$WORK/repo.git" cat-file -e "${SC_PIN}^{commit}" \
+  || die "pinned SourceCode commit $SC_PIN not found upstream"
 
 upstream_main="$(git -C "$WORK/repo.git" rev-parse refs/heads/main)"
 if [ "$upstream_main" != "$MAIN_PIN" ]; then
   say "NOTE: upstream main moved to ${upstream_main:0:12} (pin unchanged: ${MAIN_PIN:0:12})"
 fi
+upstream_sc="$(git -C "$WORK/repo.git" rev-parse refs/heads/SourceCode)"
+if [ "$upstream_sc" != "$SC_PIN" ]; then
+  say "NOTE: upstream SourceCode moved to ${upstream_sc:0:12} (pin unchanged: ${SC_PIN:0:12})"
+fi
 
 git -C "$WORK/repo.git" update-ref refs/heads/pin-main "$MAIN_PIN"
 git -C "$WORK/repo.git" update-ref refs/heads/pin-pr1 "$PR1_PIN"
+git -C "$WORK/repo.git" update-ref refs/heads/pin-sourcecode "$SC_PIN"
 
 # --- 2. Bundle (write once, verify thereafter) ------------------------------
+# Tamper-detecting: every pin's EXACT sha must be a head in the bundle, else we
+# rebuild (a bundle missing pin-sourcecode predates the TF-oracle fix).
+need_create=1
 if [ -f "$BUNDLE" ]; then
-  say "bundle exists; verifying pinned heads"
   heads="$(git bundle list-heads "$BUNDLE")"
-  grep -q "^$MAIN_PIN refs/heads/pin-main$" <<<"$heads" \
-    || die "existing bundle lacks pin-main@$MAIN_PIN"
-  grep -q "^$PR1_PIN refs/heads/pin-pr1$" <<<"$heads" \
-    || die "existing bundle lacks pin-pr1@$PR1_PIN"
-else
-  say "creating wildlife.bundle"
-  git -C "$WORK/repo.git" bundle create "$BUNDLE" pin-main pin-pr1
+  if grep -q "^$MAIN_PIN refs/heads/pin-main$" <<<"$heads" \
+     && grep -q "^$PR1_PIN refs/heads/pin-pr1$" <<<"$heads" \
+     && grep -q "^$SC_PIN refs/heads/pin-sourcecode$" <<<"$heads"; then
+    say "bundle exists with all three pins; verifying"
+    need_create=0
+  else
+    say "bundle exists but is missing a pin (or carries a different sha); recreating"
+    rm -f "$BUNDLE"
+  fi
+fi
+if [ "$need_create" = 1 ]; then
+  say "creating wildlife.bundle (pin-main + pin-pr1 + pin-sourcecode)"
+  git -C "$WORK/repo.git" bundle create "$BUNDLE" pin-main pin-pr1 pin-sourcecode
 fi
 git bundle verify "$BUNDLE" >/dev/null 2>&1 || die "bundle fails 'git bundle verify'"
 

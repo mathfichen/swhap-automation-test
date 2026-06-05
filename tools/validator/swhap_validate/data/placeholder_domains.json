@@ -1,0 +1,6 @@
+{
+  "_comment": "Placeholder noreply domains (csv-contract §5.1). A CSV email on one of these is the sanctioned placeholder and does NOT trip PI-1.",
+  "placeholder_domains": ["noreply.example.org", "noreply.example.com"],
+  "_comment_public": "Public-provider allowlist (validator-report §2.5b): redaction may publish the literal domain for these (carries no identifying info). Every other address reports domain_class=private with no literal domain.",
+  "public_providers": ["gmail.com", "outlook.com", "hotmail.com", "yahoo.com", "icloud.com", "proton.me", "protonmail.com"]
+}

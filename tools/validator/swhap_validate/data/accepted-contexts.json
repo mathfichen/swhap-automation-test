@@ -1,0 +1,20 @@
+{
+  "_comment": "Accepted @context set as swh-indexer consumes it (D9; validator plan CM-2). Tracked DATA, refreshed from swh-indexer source — NOT a hardcoded constant. As of 2026-06: canonical CodeMeta 2.0 (+4 alternates) and w3id CodeMeta 3.0 (+1 alternate). CodeMeta 3.1 is crosswalk-only and shares the 3.0 context. No 4.0 yet.",
+  "swh_indexer_ref": "swh-indexer @ 2026-06-05",
+  "accepted": [
+    "https://doi.org/10.5063/schema/codemeta-2.0",
+    "https://raw.githubusercontent.com/codemeta/codemeta/master/codemeta.jsonld",
+    "https://raw.githubusercontent.com/codemeta/codemeta/2.0/codemeta.jsonld",
+    "https://codemeta.github.io/terms/",
+    "http://schema.org/",
+    "https://w3id.org/codemeta/3.0",
+    "https://raw.githubusercontent.com/codemeta/codemeta/master/codemeta-3.0.jsonld"
+  ],
+  "known_newer_not_yet_accepted": [
+    "https://w3id.org/codemeta/4.0"
+  ],
+  "vendored_context_files": {
+    "https://doi.org/10.5063/schema/codemeta-2.0": "contexts/codemeta-2.0.jsonld",
+    "https://w3id.org/codemeta/3.0": "contexts/codemeta-3.0.jsonld"
+  }
+}

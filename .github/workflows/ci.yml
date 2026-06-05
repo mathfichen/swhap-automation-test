@@ -31,13 +31,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: pytest (when tests land)
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      # Editable installs make swhap_core / swhap_validate importable; the
+      # top-level pyproject.toml [tool.pytest.ini_options] discovers all three
+      # W2 suites (fixtures/tests, swhap-core/tests, tools/validator/tests).
+      # jsonschema + pyld are validator test-only deps (CM-3 JSON-LD, report
+      # schema checks); runtimes stay stdlib-only.
+      - name: install packages + test deps
         run: |
-          if [ -d tests ]; then
-            pipx run pytest -q
-          else
-            echo "no tests yet — skipped"
-          fi
+          python -m pip install --upgrade pip
+          python -m pip install -e swhap-core -e tools/validator pytest jsonschema pyld
+      - name: pytest (all suites)
+        run: python -m pytest -q
 
   fixtures:
     # Re-acquires from upstream and verifies bundle + tarballs against the
