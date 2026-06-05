@@ -6,19 +6,19 @@ from swhap_validate.cli import run_validation
 
 def test_defective_report_schema_valid(wildlife, validate_report):
     rep = run_validation(wildlife["defective"], "strict-P", "build",
-                         manifests=wildlife["ordered"])
+                         manifests=wildlife["manifests"])
     validate_report(rep)
 
 
 def test_clean_report_schema_valid(wildlife, validate_report):
     rep = run_validation(wildlife["clean"], "strict-P", "build",
-                         manifests=wildlife["ordered"])
+                         manifests=wildlife["manifests"])
     validate_report(rep)
 
 
 def test_meta_stable_report_schema_valid_and_no_runvariant(wildlife, validate_report):
     rep = run_validation(wildlife["defective"], "strict-P", "build",
-                         manifests=wildlife["ordered"], meta_stable=True)
+                         manifests=wildlife["manifests"], meta_stable=True)
     doc = validate_report(rep)
     assert doc["run"]["meta_stable"] is True
     assert "timestamp" not in doc["run"]
@@ -28,17 +28,17 @@ def test_meta_stable_report_schema_valid_and_no_runvariant(wildlife, validate_re
 
 def test_meta_stable_double_run_byte_identical(wildlife):
     a = run_validation(wildlife["defective"], "strict-P", "build",
-                       manifests=wildlife["ordered"], meta_stable=True).serialize()
+                       manifests=wildlife["manifests"], meta_stable=True).serialize()
     b = run_validation(wildlife["defective"], "strict-P", "build",
-                       manifests=wildlife["ordered"], meta_stable=True).serialize()
+                       manifests=wildlife["manifests"], meta_stable=True).serialize()
     assert a == b
 
 
 def test_finding_ids_stable_across_runs(wildlife):
     a = run_validation(wildlife["defective"], "strict-P", "build",
-                       manifests=wildlife["ordered"])
+                       manifests=wildlife["manifests"])
     b = run_validation(wildlife["defective"], "strict-P", "build",
-                       manifests=wildlife["ordered"])
+                       manifests=wildlife["manifests"])
     assert sorted(f.id() for f in a.findings) == sorted(f.id() for f in b.findings)
 
 
@@ -69,7 +69,7 @@ def test_legacy_profile_enforced_false_exit_zero(wildlife):
     """Legacy audit: findings keep true severities but enforced:false, so the
     exit code is 0 (the run succeeded; findings are the output)."""
     rep = run_validation(wildlife["defective"], "legacy", "build",
-                         manifests=wildlife["ordered"])
+                         manifests=wildlife["manifests"])
     fails = [f for f in rep.findings if f.severity == R.FAIL]
     assert fails, "legacy run should still surface FAIL-classified findings"
     assert all(f.enforced is False for f in rep.findings)
@@ -78,7 +78,7 @@ def test_legacy_profile_enforced_false_exit_zero(wildlife):
 
 def test_summary_counts(wildlife):
     rep = run_validation(wildlife["clean"], "strict-P", "build",
-                         manifests=wildlife["ordered"])
+                         manifests=wildlife["manifests"])
     doc = rep.to_dict()
     s = doc["summary"]
     assert s["fail"] == sum(1 for f in doc["findings"] if f["severity"] == "FAIL")

@@ -5,8 +5,11 @@ from __future__ import annotations
 
 import argparse
 import datetime as _dt
+import os
+import re
 import sys
 
+from . import manifest as _manifest
 from . import profiles
 from .context import RepoContext
 from .report import EXIT_INTERNAL, EXIT_USAGE, Report
@@ -37,9 +40,12 @@ def _parse_reference_date(s):
 def run_validation(workdir, profile, gate, *, manifests=None,
                    intake_profile=None, published_remote=None,
                    strict_warn=False, meta_stable=False, reference_date=None,
-                   skip=None, only=None, invocation=None):
-    """Run the M1a battery; return a finalized Report. `manifests` is an ordered
-    list of (tag, Manifest) for the TF battery (oracle from the fixtures slice).
+                   skip=None, only=None, invocation=None,
+                   manifest_skip_reason=None):
+    """Run the M1a battery; return a finalized Report. `manifests` is a
+    release-ordered ``list[Manifest]`` (ground-truth tree oracles); the TF
+    battery maps each to its real git tree — a release tag where one exists, else
+    the SourceCode commit whose message names the release — and compares them.
     """
     skip = set(skip or ())
     ctx = RepoContext(workdir)
@@ -79,14 +85,26 @@ def run_validation(workdir, profile, gate, *, manifests=None,
     release_tags = _release_tags(csv_bytes, manifests, ctx)
 
     # ---- TF ------------------------------------------------------------
+    ordered, unmapped = ([], [])
+    if manifests:
+        ordered, unmapped = _map_releases(ctx, manifests)
     if enabled("TF-1"):
-        if manifests:
-            tree_fidelity.run(report, ctx, manifests)
-            for tag, _m in manifests:
-                report.refs_checked.append(f"refs/tags/{tag}")
+        if ordered:
+            tree_fidelity.run(report, ctx, ordered)
+            seen = set()
+            for _rel, ref, _m in ordered:
+                r = ref if ref.startswith("refs/") else "refs/heads/SourceCode"
+                if r not in seen:
+                    report.refs_checked.append(r)
+                    seen.add(r)
+            for rel, reason in unmapped:
+                report.skip("TF-1", f"release {rel} not located ({reason})")
         else:
+            reason = (manifest_skip_reason
+                      or ("provided manifests do not map to any release tree"
+                          if manifests else "no ground-truth manifest provided"))
             for cid in ("TF-1", "TF-2", "TF-3", "TF-4", "TF-5"):
-                report.skip(cid, "no ground-truth manifest provided")
+                report.skip(cid, reason)
 
     # ---- BP ------------------------------------------------------------
     if enabled("BP-1"):
@@ -126,9 +144,7 @@ def run_validation(workdir, profile, gate, *, manifests=None,
 
 
 def _release_tags(csv_bytes, manifests, ctx):
-    if manifests:
-        return [t for t, _m in manifests]
-    # derive from canonical CSV if present
+    # 1. the canonical CSV release-tag column is authoritative when present.
     tags = []
     if csv_bytes:
         import csv as _csv
@@ -144,8 +160,90 @@ def _release_tags(csv_bytes, manifests, ctx):
                 pass
     if tags:
         return tags
-    # fall back to all annotated tags in the repo
+    # 2. otherwise the EXPECTED tag names per the ground-truth releases — the
+    #    SWHAP convention is one annotated tag `v<release>` per release. On the
+    #    published exemplar (no canonical CSV, no tags) this makes BP-3 record
+    #    the missing-tag compliance defect instead of going silent.
+    if manifests:
+        return [f"v{m.release}" for m in manifests]
+    # 3. fall back to all annotated tags in the repo.
     return [t for t in ctx.tags() if ctx.is_annotated_tag(t)]
+
+
+def _subject_names_release(subject, release):
+    """True if a SourceCode commit subject names `release` as a delimited token
+    (e.g. 'Wild_LIFE 1.0 (reconstructed ...)' names '1.0' but not '1.02')."""
+    return re.search(r"(?:^|\s)" + re.escape(release) + r"(?:\s|$)",
+                     subject) is not None
+
+
+def _map_releases(ctx, manifests):
+    """Map each ground-truth Manifest to the real git tree to validate.
+
+    Preference order per release: an annotated/lightweight tag named `v<rel>` or
+    `<rel>`; else (the published exemplar ships NO tags) the unique SourceCode
+    commit whose message names the release. Returns
+    ``(ordered, unmapped)`` where ordered = list[(release, ref, Manifest)] and
+    ref is a resolvable git ref (tag ref) or a commit sha.
+    """
+    ordered, unmapped = [], []
+    sc_commits = []
+    if ctx.ref_exists("refs/heads/SourceCode"):
+        for c in ctx.commits_on("refs/heads/SourceCode"):
+            sc_commits.append((c, ctx.commit_subject(c)))
+    for man in manifests:
+        rel = man.release
+        ref = None
+        for cand in (f"v{rel}", rel):
+            if ctx.ref_exists(f"refs/tags/{cand}"):
+                ref = f"refs/tags/{cand}"
+                break
+        if ref is None and sc_commits:
+            matches = [c for c, subj in sc_commits
+                       if _subject_names_release(subj, rel)]
+            if len(matches) == 1:
+                ref = matches[0]
+            else:
+                unmapped.append((rel, "ambiguous-commit" if matches
+                                 else "no-matching-commit"))
+                continue
+        if ref is None:
+            unmapped.append((rel, "no-tag-no-sourcecode"))
+            continue
+        ordered.append((rel, ref, man))
+    return ordered, unmapped
+
+
+def _load_oracle_manifests(manifests_dir, raw_materials):
+    """Discover ground-truth tree manifests. Returns ``(manifests, skip_reason)``
+    where manifests is a release-ordered list[Manifest] or None (no oracle dir
+    given). A given-but-empty directory yields ([], reason) so TF SKIPs with a
+    truthful reason rather than silently passing.
+
+    `--manifests <dir>` is an explicit oracle directory. `--raw-materials <dir>`
+    (the workbench raw_materials/) is also honoured: if it carries tree
+    manifests (or a manifests/ subdir) they are used; if it carries only
+    archives the validator does NOT extract them — derivation via `swhap
+    inspect` is core-owned and out of M1a scope — and TF SKIPs with that reason.
+    """
+    if manifests_dir:
+        if not os.path.isdir(manifests_dir):
+            return [], "--manifests path is not a directory"
+        mans = _manifest.load_dir(manifests_dir)
+        if mans:
+            return mans, None
+        return [], "--manifests directory carries no swhap-tree-manifest/1 oracles"
+    if raw_materials:
+        if not os.path.isdir(raw_materials):
+            return [], "--raw-materials path is not a directory"
+        for cand in (raw_materials, os.path.join(raw_materials, "manifests")):
+            if os.path.isdir(cand):
+                mans = _manifest.load_dir(cand)
+                if mans:
+                    return mans, None
+        return [], ("--raw-materials carries no tree manifests; deriving them "
+                    "from archives (swhap inspect) is out of M1a scope")
+    return None, None
 
 
 def _finalize(report, profile):
@@ -165,6 +263,11 @@ def main(argv=None):
     ap.add_argument("--published-remote")
     ap.add_argument("--intake-profile", choices=["browser", "cli"])
     ap.add_argument("--workdir", default=".")
+    # Ground-truth tree-manifest oracle for the TF battery. --manifests is the
+    # explicit oracle directory; --raw-materials points at the workbench
+    # raw_materials/ (honoured for manifest discovery — see _load_oracle_manifests
+    # — never extracted here).
+    ap.add_argument("--manifests")
     ap.add_argument("--raw-materials")
     ap.add_argument("--strict-warn", action="store_true")
     ap.add_argument("--run-meta-stable", action="store_true")
@@ -186,6 +289,9 @@ def main(argv=None):
     only = [s for s in ns.checks.split(",") if s] or None
     profs = [ns.profile] if ns.profile else [profiles.STRICT_P, profiles.STRICT_G]
 
+    manifests, manifest_skip_reason = _load_oracle_manifests(
+        ns.manifests, ns.raw_materials)
+
     if len(profs) > 1 and ns.report == "-":
         sys.stderr.write("usage error: --report - rejected in dual-profile mode\n")
         return EXIT_USAGE
@@ -194,11 +300,13 @@ def main(argv=None):
     for prof in profs:
         try:
             report = run_validation(
-                ns.workdir, prof, ns.gate, intake_profile=ns.intake_profile,
+                ns.workdir, prof, ns.gate, manifests=manifests,
+                intake_profile=ns.intake_profile,
                 published_remote=ns.published_remote,
                 strict_warn=ns.strict_warn, meta_stable=ns.run_meta_stable,
                 reference_date=ref_date, skip=skip, only=only,
-                invocation=["swhap-validate", *argv])
+                invocation=["swhap-validate", *argv],
+                manifest_skip_reason=manifest_skip_reason)
         except Exception as exc:  # internal error → exit 3
             report = Report(prof, ns.gate)
             report.error = {"code": "internal", "message": str(exc)}

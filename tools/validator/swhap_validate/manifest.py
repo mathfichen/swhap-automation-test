@@ -8,6 +8,8 @@ path space.
 from __future__ import annotations
 
 import json
+import os
+import re
 from dataclasses import dataclass
 
 
@@ -28,6 +30,7 @@ class Manifest:
     wrapper: str | None
     entries: dict       # path -> Entry
     empty_dirs: list    # POSIX paths of empty directories (→ .emptydir markers)
+    quarantined: bool = False  # census-only oracle (e.g. 1.02): never a TF pass/fail oracle
 
     @property
     def files(self) -> dict:
@@ -60,8 +63,51 @@ def from_dict(doc: dict) -> Manifest:
             blob=blob, target=e.get("target"),
         )
     sha256 = doc.get("tarball_sha256", doc.get("sha256"))
+    empty_dirs = doc.get("empty_dirs", [])
+    # swhap-tree-manifest/1 carries empty_dirs as a list of POSIX path strings;
+    # the validator's reconstruction shape used the same. Tolerate either.
+    empty_dirs = [e["path"] if isinstance(e, dict) else e for e in empty_dirs]
     return Manifest(
         release=doc["release"], tarball=doc["tarball"], sha256=sha256,
         wrapper=doc.get("wrapper"), entries=entries,
-        empty_dirs=list(doc.get("empty_dirs", [])),
+        empty_dirs=list(empty_dirs),
+        quarantined=bool(doc.get("quarantined", False)),
     )
+
+
+def _release_sort_key(release: str):
+    """Order releases numerically where possible: 0.90 < 0.91 < 1.0 < 1.02."""
+    key = []
+    for tok in re.split(r"[._]", release):
+        key.append((0, int(tok)) if tok.isdigit() else (1, tok))
+    return key
+
+
+def load_dir(path: str, *, include_quarantined: bool = False) -> list:
+    """Load every ``swhap-tree-manifest/1`` JSON oracle under ``path`` as a
+    release-ordered ``list[Manifest]``. Quarantined manifests (census-only, e.g.
+    1.02) are excluded from the TF oracle unless explicitly requested. Files that
+    are not tree manifests are ignored (so a directory may also carry README/
+    evidence notes). Returns [] if nothing parses (caller decides to SKIP, not
+    crash)."""
+    out = []
+    for name in sorted(os.listdir(path)):
+        if not name.endswith(".json"):
+            continue
+        full = os.path.join(path, name)
+        try:
+            with open(full, encoding="utf-8") as fh:
+                doc = json.load(fh)
+        except (ValueError, OSError):
+            continue
+        if doc.get("schema") != "swhap-tree-manifest/1" and "entries" not in doc:
+            continue
+        try:
+            man = from_dict(doc)
+        except (KeyError, TypeError):
+            continue
+        if man.quarantined and not include_quarantined:
+            continue
+        out.append(man)
+    out.sort(key=lambda m: _release_sort_key(m.release))
+    return out

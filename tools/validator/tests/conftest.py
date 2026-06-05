@@ -40,14 +40,26 @@ def validate_report(schema):
 
 @pytest.fixture(scope="session")
 def wildlife(tmp_path_factory):
-    """Build the reconstructed Wild_LIFE fixtures once per session."""
+    """Build the Wild_LIFE fixtures once per session from REAL pinned objects.
+
+    - ``defective`` = the real published exemplar (main=pin-main,
+      SourceCode=pin-sourcecode) checked out of the bundle. No reconstruction.
+    - ``clean`` = a faithful all-green regeneration from the pinned tarballs.
+    - ``manifests`` = the real committed tree-manifest oracles (release order),
+      excluding the quarantined 1.02 census.
+    """
     root = tmp_path_factory.mktemp("wildlife")
-    fx = wf.build(str(root))
-    manifests = {r: _manifest.from_dict(fx["manifests"][r]) for r in fx["order"]}
-    ordered = [(fx["tags"][r], manifests[r]) for r in fx["order"]]
-    fx["manifest_objs"] = manifests
-    fx["ordered"] = ordered
-    return fx
+    defective = wf.build_exemplar(str(os.path.join(str(root), "exemplar")))
+    clean = wf.build_clean(str(root))
+    manifests = _manifest.load_dir(wf.MANIFESTS_DIR)
+    return {
+        "defective": defective,
+        "clean": clean,
+        "manifests": manifests,
+        "manifests_dir": wf.MANIFESTS_DIR,
+        "order": wf.ORDER,
+        "tags": wf.TAG,
+    }
 
 
 def make_git_repo(path, files):

@@ -141,6 +141,11 @@ class RepoContext:
             i += 2
         return out
 
+    def commit_subject(self, commit: str) -> str:
+        """First line of the commit message (used to map a release -> commit when
+        the exemplar ships no annotated tags)."""
+        return git_text(self.repo, "show", "-s", "--format=%s", commit).strip()
+
     def tag_object(self, tag: str) -> str:
         """The annotated-tag object sha (not the commit it points to)."""
         return git_text(self.repo, "rev-parse", f"refs/tags/{tag}").strip()

@@ -1,29 +1,22 @@
-"""Reconstruct the Wild_LIFE ground truth + the *defective published exemplar*
-from the pinned tarballs, for the M1a red/green gate.
+"""Wild_LIFE fixtures for the M1a TF gate — built from REAL pinned objects.
 
-WHY THIS EXISTS (dependency note): the pinned ``fixtures/wildlife/wildlife.bundle``
-contains only ``pin-main`` (1571ce5) and ``pin-pr1`` (5e05003) — it does NOT carry
-the ``SourceCode`` branch or the release tags whose trees hold the v0.91/v1.0
-defects (followup-2). The exemplar-pilot ground-truth manifests + defect register
-(its T2–T4) and a bundle carrying SourceCode are not present in this checkout.
-So this module rebuilds, deterministically and read-only, exactly the documented
-corruption from the real tarballs:
+This module no longer reconstructs the corruption. The published exemplar's real
+``SourceCode`` history (3 commits, one per release, NO tags) is pinned in
+``fixtures/wildlife/wildlife.bundle`` as ``pin-sourcecode`` alongside the real
+``main`` (``pin-main``). ``build_exemplar`` checks those real refs out, so the TF
+gate compares the REAL release trees against the REAL tarball-derived manifests
+(``fixtures/wildlife/manifests/*.json``). The defect register (0.90 clean, 0.91
++19 / 3 stale, 1.0 +1145 / stale LICENSE, zero deletions between releases) is
+therefore DERIVED from the live repo, not injected here.
 
-  * manifests = the wrapper-stripped tarball census (the C4 oracle),
-  * a ``defective`` repo whose SourceCode tags reproduce the leak
-    (v0.91: 19 extras + 3 stale; v1.0: 1145-entry leak + stale LICENSE; the
-    v0.91→v1.0 diff has zero deletions), with ``main`` = the real exemplar
-    metadata (7-col CSV, sciencecodemeta @context, boilerplate journal),
-  * a ``clean`` repo whose tags == their manifests, with canonical metadata and a
-    coverage-complete journal.jsonl.
-
-Tarballs are extracted with the ``data`` filter (no path traversal) and NEVER
-executed. Once exemplar-pilot delivers its manifests + a SourceCode-bearing
-bundle, this reconstruction is replaced by consuming those oracles directly.
+``build_clean`` is a *faithful regeneration* (not a defect model): it extracts
+the pinned tarballs read-only and writes one annotated tag per release with the
+correct trees + canonical metadata + a coverage-complete journal, so the
+all-green positive fixture is real too. Tarballs are extracted with the ``data``
+filter (no path traversal) and NEVER executed.
 """
 from __future__ import annotations
 
-import hashlib
 import os
 import shutil
 import subprocess
@@ -32,18 +25,15 @@ import tarfile
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__),
                                          "..", "..", ".."))
 TARBALLS = os.path.join(REPO_ROOT, "fixtures", "wildlife", "tarballs")
+MANIFESTS_DIR = os.path.join(REPO_ROOT, "fixtures", "wildlife", "manifests")
 BUNDLE = os.path.join(REPO_ROOT, "fixtures", "wildlife", "wildlife.bundle")
-SHA256 = {
-    "0.90": "928453daa1ae1477113f323b2d98d3920d15999d8ed7d496f0b606598592df19",
-    "0.91": "dbf206afbd22b57070a484687e24548efd66754397b81661121bc2de70ae5ce6",
-    "1.0": "c8d3d7c72e9eeab2b6124348bc5e4b8f15d69c1fd29b35768251751a505a670e",
-}
+
 TARBALL_FILE = {"0.90": "life_090.tgz", "0.91": "life_091.tgz",
                 "1.0": "life_10.tgz"}
 TAG = {"0.90": "v0.90", "0.91": "v0.91", "1.0": "v1.0"}
 ORDER = ["0.90", "0.91", "1.0"]
 
-# Fixed identities/dates for D4 determinism in the fixture.
+# Fixed identities/dates for D4 determinism in the clean fixture.
 _ENV = {
     "GIT_AUTHOR_NAME": "Wild_LIFE authors",
     "GIT_AUTHOR_EMAIL": "wildlife-authors@noreply.example.org",
@@ -52,16 +42,6 @@ _ENV = {
     "GIT_COMMITTER_EMAIL": "example-curator@noreply.example.org",
     "GIT_COMMITTER_DATE": "2026-06-05T00:00:00+0000",
 }
-
-# The 3 stale paths in v0.91 and the stale LICENSE in v1.0 (followup-2 §2/§3).
-_V091_STALE = ["Examples/hamming.lf", "Tests/choice.out", "Tests/choice.ref"]
-
-
-def _git_blob_sha1(content: bytes) -> str:
-    h = hashlib.sha1()
-    h.update(b"blob %d\0" % len(content))
-    h.update(content)
-    return h.hexdigest()
 
 
 def _git(repo, *args, env=None):
@@ -72,24 +52,39 @@ def _git(repo, *args, env=None):
                    capture_output=True)
 
 
+# --------------------------------------------------------------------------
+# Real published exemplar (from the pinned bundle) — the TF gate oracle target.
+# --------------------------------------------------------------------------
+def build_exemplar(dest):
+    """Check out the REAL pinned exemplar: ``main`` = published metadata (the
+    7-col CSV, sciencecodemeta @context, boilerplate journal — all real
+    defects), ``SourceCode`` = the real 3-commit corrupted history (no tags)."""
+    os.makedirs(dest, exist_ok=True)
+    subprocess.run(["git", "clone", "-q", BUNDLE, dest], check=True,
+                   capture_output=True)
+    _git(dest, "checkout", "-q", "-b", "main", "origin/pin-main")
+    _git(dest, "branch", "-q", "SourceCode", "origin/pin-sourcecode")
+    return dest
+
+
+# --------------------------------------------------------------------------
+# Faithful clean regeneration (positive fixture) — tarballs -> tagged trees.
+# --------------------------------------------------------------------------
 def _extract(release, dest):
     name = TARBALL_FILE[release]
     with tarfile.open(os.path.join(TARBALLS, name)) as t:
-        # verify wrapper is a single top component
         t.extractall(dest, filter="data")
     tops = os.listdir(dest)
     assert len(tops) == 1, f"{name}: expected single wrapper dir, got {tops}"
     wrapper = tops[0]
-    return os.path.join(dest, wrapper), wrapper + "/"
+    return os.path.join(dest, wrapper)
 
 
 def _census(root):
-    """Walk a wrapper-stripped tree → (files {path:bytes}, symlinks {path:target},
-    empty_dirs [paths])."""
+    """Walk a wrapper-stripped tree -> (files {path:bytes}, symlinks
+    {path:target}, empty_dirs [paths])."""
     files, symlinks, empty_dirs = {}, {}, []
     for dirpath, dirnames, filenames in os.walk(root):
-        # Symlinks-to-directories appear in dirnames; capture them as symlinks
-        # and stop os.walk from descending into them.
         real_dirs = []
         for d in dirnames:
             full = os.path.join(dirpath, d)
@@ -111,26 +106,6 @@ def _census(root):
                 with open(full, "rb") as fh:
                     files[rel] = fh.read()
     return files, symlinks, sorted(empty_dirs)
-
-
-def _manifest_dict(release, files, symlinks, empty_dirs, wrapper):
-    entries = []
-    for p, content in files.items():
-        mode = "100755" if False else "100644"  # tarballs here are all 100644
-        entries.append({"path": p, "type": "file", "mode": mode,
-                        "blob": _git_blob_sha1(content)})
-    for p, target in symlinks.items():
-        entries.append({"path": p, "type": "symlink", "mode": "120000",
-                        "blob": _git_blob_sha1(target.encode("utf-8")),
-                        "target": target})
-    entries.sort(key=lambda e: e["path"])
-    return {
-        "release": release, "tarball": TARBALL_FILE[release],
-        "sha256": SHA256[release], "wrapper": wrapper,
-        "entry_count": len(entries), "entries": entries,
-        "empty_dirs": empty_dirs, "encoding_notes": [],
-        "generator": {"tool": "wildlife_fixture.py", "extractor_version": "stdlib"},
-    }
 
 
 def _clear_worktree(repo):
@@ -170,110 +145,46 @@ def _commit_tag(repo, tag, message):
     _git(repo, "tag", "-a", tag, "-m", f"Version {tag}", env=_ENV)
 
 
-def build(tmp_root):
-    """Build the fixture set under tmp_root. Returns a dict with repo paths,
-    manifests (release→dict), and ordered tag list."""
+def build_clean(tmp_root):
+    """Build a fully-correct workbench: orphan SourceCode with one annotated tag
+    per release whose trees == the tarballs, canonical metadata, coverage
+    journal. Returns the repo path."""
     work = os.path.join(tmp_root, "work")
     os.makedirs(work, exist_ok=True)
-
-    # 1. extract + census all three releases.
-    roots, census, manifests = {}, {}, {}
+    census = {}
     for rel in ORDER:
-        root, wrapper = _extract(rel, os.path.join(work, "x" + rel))
-        roots[rel] = root
-        files, symlinks, empty = _census(root)
-        census[rel] = (files, symlinks, empty)
-        manifests[rel] = _manifest_dict(rel, files, symlinks, empty, wrapper)
+        root = _extract(rel, os.path.join(work, "x" + rel))
+        census[rel] = _census(root)
 
-    f90, _, _ = census["0.90"]
-    f91, s91, e91 = census["0.91"]
-    f10, s10, e10 = census["1.0"]
-
-    # 2. reconstruct the documented leak trees.
-    extras91 = set(f90) - set(f91)                 # 19 v0.90-only paths
-    v091_git_files = dict(f91)
-    for p in extras91:                              # leak the deletions
-        v091_git_files[p] = f90[p]
-    for p in _V091_STALE:                           # 3 stale overwrites
-        if p in f90:
-            v091_git_files[p] = f90[p]
-
-    leak10 = set(v091_git_files) - set(f10)         # 1145 paths leaked into v1.0
-    v10_git_files = dict(f10)
-    for p in leak10:
-        v10_git_files[p] = v091_git_files[p]
-    # stale LICENSE: v1.0 carries v0.91's LICENSE content
-    if "LICENSE" in f10 and "LICENSE" in f91:
-        v10_git_files["LICENSE"] = f91["LICENSE"]
-
-    defective = _build_repo(
-        os.path.join(tmp_root, "defective"),
-        main_from="origin/pin-main",
-        trees=[
-            ("0.90", f90, {}, []),
-            ("0.91", v091_git_files, {}, []),
-            ("1.0", v10_git_files, s10, e10),
-        ],
-        journal=None,  # main carries the real boilerplate journal.md from pin-main
-    )
-    clean = _build_repo(
-        os.path.join(tmp_root, "clean"),
-        main_from=None,
-        trees=[
-            ("0.90", f90, {}, []),
-            ("0.91", f91, {}, e91),
-            ("1.0", f10, s10, e10),
-        ],
-        journal="coverage",  # journal.jsonl referencing every commit/tag
-        canonical_metadata=True,
-    )
-
-    return {"manifests": manifests, "order": ORDER, "tags": TAG,
-            "defective": defective, "clean": clean}
-
-
-def _build_repo(path, *, main_from, trees, journal, canonical_metadata=False):
+    path = os.path.join(tmp_root, "clean")
     os.makedirs(path, exist_ok=True)
-    if main_from:
-        subprocess.run(["git", "clone", "-q", BUNDLE, path],
-                       check=True, capture_output=True)
-        _git(path, "checkout", "-q", "-b", "main", main_from)
-    else:
-        _git(path, "init", "-q", "-b", "main")
-        # minimal placeholder so main exists; replaced below if canonical
-        with open(os.path.join(path, "README.md"), "w") as fh:
-            fh.write("# Wild_LIFE workbench\n")
-        _git(path, "add", "-A", env=_ENV)
-        _git(path, "commit", "-m", "init", env=_ENV)
+    _git(path, "init", "-q", "-b", "main")
+    with open(os.path.join(path, "README.md"), "w") as fh:
+        fh.write("# Wild_LIFE workbench\n")
+    _git(path, "add", "-A", env=_ENV)
+    _git(path, "commit", "-m", "init", env=_ENV)
 
-    # Build SourceCode as an orphan branch.
     _git(path, "checkout", "-q", "--orphan", "SourceCode")
     _git(path, "rm", "-rf", "-q", ".")
-    tag_for = {}
-    for rel, files, symlinks, empty in trees:
+    for rel in ORDER:
+        files, symlinks, empty = census[rel]
         _write_tree(path, files, symlinks, empty)
         _commit_tag(path, TAG[rel], f"Wild_LIFE {rel}")
-        tag_for[rel] = TAG[rel]
 
-    # Collect curated object hashes for coverage journal.
-    hashes = []
-    for c in subprocess.run(["git", "-C", path, "rev-list", "SourceCode"],
+    hashes = subprocess.run(["git", "-C", path, "rev-list", "SourceCode"],
                             check=True, capture_output=True,
-                            text=True).stdout.split():
-        hashes.append(c)
-    for rel in tag_for:
+                            text=True).stdout.split()
+    for rel in ORDER:
         obj = subprocess.run(["git", "-C", path, "rev-parse",
                               f"refs/tags/{TAG[rel]}"], check=True,
                              capture_output=True, text=True).stdout.strip()
         hashes.append(obj)
 
     _git(path, "checkout", "-q", "main")
-    if canonical_metadata:
-        _write_canonical_metadata(path)
-    if journal == "coverage":
-        _write_coverage_journal(path, hashes)
-        _git(path, "add", "-A", env=_ENV)
-        _git(path, "commit", "-m", "metadata", env=_ENV)
+    _write_canonical_metadata(path)
+    _write_coverage_journal(path, hashes)
+    _git(path, "add", "-A", env=_ENV)
+    _git(path, "commit", "-m", "metadata", env=_ENV)
     return path
 
 
@@ -296,8 +207,7 @@ def _write_canonical_metadata(path):
         fh.write('{\n  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",\n'
                  '  "@type": "SoftwareSourceCode",\n'
                  '  "name": "Wild_LIFE",\n'
-                 '  "funder": {"@type": "Organization", "name": "DEC PRL"},\n'
-                 '  "maintainer": {"@type": "Person", "name": "Example Curator"}\n}\n')
+                 '  "funder": {"@type": "Organization", "name": "DEC PRL"}\n}\n')
 
 
 def _write_coverage_journal(path, hashes):

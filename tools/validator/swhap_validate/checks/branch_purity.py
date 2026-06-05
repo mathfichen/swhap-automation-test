@@ -122,12 +122,24 @@ def _bp3(report, ctx, sc, release_tags):
             f"lists {len(release_tags)} release(s); there must be exactly one "
             "commit per release.",
             required_approver_role=_ROLE))
+    sc_present = ctx.ref_exists("refs/heads/SourceCode")
     for tag in release_tags:
         if not ctx.ref_exists(f"refs/tags/{tag}"):
+            # No annotated tag for this release. On the published exemplar every
+            # release is identified ONLY by its SourceCode commit message (the
+            # release->commit mapping the validator had to fall back to); the
+            # brief requires one annotated tag per release, so this is a
+            # SWHAP-compliance defect, recorded rather than fatal.
+            extra = (" The release is identified only by its SourceCode commit "
+                     "message, with no tag to mark it.") if sc_present else ""
             report.add(Finding(
                 "BP-3", FAIL, {"tag": tag}, ["tag"],
-                f"Release '{tag}' has no annotated tag.",
-                required_approver_role=_ROLE))
+                f"Release '{tag}' has no annotated tag.{extra}",
+                message_technical=f"no refs/tags/{tag}; brief requires one "
+                "annotated tag per release",
+                required_approver_role=_ROLE,
+                remediation=f"Create an annotated tag '{tag}' on the release "
+                "commit on SourceCode."))
         elif not ctx.is_annotated_tag(tag):
             report.add(Finding(
                 "BP-3", FAIL, {"tag": tag}, ["tag"],
