@@ -1,0 +1,49 @@
+name: ci
+# CI on the toolkit itself from M1a (crit-M13; cicd-packaging W1).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 5 * * 1' # weekly: catches upstream drift (fixture re-verification)
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: actionlint
+        uses: docker://rhysd/actionlint:latest
+        with:
+          args: -color
+      - name: shellcheck
+        run: find . -name '*.sh' -not -path './.git/*' -print0 | xargs -0 shellcheck
+      - name: ruff (when Python lands)
+        run: |
+          if find . -name '*.py' -not -path './.git/*' | grep -q .; then
+            pipx run ruff check .
+          else
+            echo "no Python yet — skipped"
+          fi
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: pytest (when tests land)
+        run: |
+          if [ -d tests ]; then
+            pipx run pytest -q
+          else
+            echo "no tests yet — skipped"
+          fi
+
+  fixtures:
+    # Re-acquires from upstream and verifies bundle + tarballs against the
+    # frozen manifest: detects upstream tampering/drift (weekly + every PR).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: verify wildlife fixtures
+        run: bash fixtures/wildlife/acquire.sh
