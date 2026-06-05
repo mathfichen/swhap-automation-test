@@ -1,0 +1,18 @@
+[project]
+name = "swhap-validate"
+version = "0.1.0"
+description = "SWHAP compliance validator (check_swhap.sh / swhap-validate)"
+requires-python = ">=3.11"
+# Runtime: stdlib only. Optional: pyld (CM-3 JSON-LD) — clearly skipped if absent.
+dependencies = []
+
+[project.optional-dependencies]
+jsonld = ["pyld"]
+test = ["pytest", "jsonschema", "pyld"]
+
+[project.scripts]
+swhap-validate = "swhap_validate.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["swhap_validate*"]
