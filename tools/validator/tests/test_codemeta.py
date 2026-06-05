@@ -78,3 +78,16 @@ def test_CM3_offline_expand_green_on_canonical():
 def test_CM3_skipped_when_context_not_accepted():
     rep = run({"@context": "https://example.org/bogus", "name": "x"})
     assert any(s["id"] == "CM-3" for s in rep.checks_skipped)
+
+
+def test_CM3_absent_backend_warns_not_silent(monkeypatch):
+    """A missing JSON-LD backend must be recorded LOUDLY (CM-3 ran + WARN),
+    never a silent skip — a silently-unverified @context is the D9/C2 failure
+    mode (swh-indexer drops the whole file)."""
+    import sys
+    monkeypatch.setitem(sys.modules, "pyld", None)  # `from pyld import ...` -> ImportError
+    rep = run({"@context": CANON, "name": "x"})
+    assert "CM-3" in rep.checks_run
+    assert not any(s["id"] == "CM-3" for s in rep.checks_skipped)
+    warns = [f for f in checks(rep, "CM-3") if f.severity == WARN]
+    assert warns, "absent JSON-LD backend must emit a CM-3 WARN, not skip silently"

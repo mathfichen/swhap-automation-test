@@ -128,7 +128,23 @@ def _run_cm3(report, doc, contexts, vendored, cm2_ok):
     try:
         from pyld import jsonld
     except Exception:  # pragma: no cover - environment dependent
-        report.skip("CM-3", "pyld not installed")
+        # Do NOT silently skip: an absent JSON-LD backend means the one check
+        # that reproduces swh-indexer's @context processing did not run, and a
+        # silently-dropped codemeta.json is the D9 / critique-C2 failure mode.
+        # Record the non-enforcement loudly as a WARN so the report never
+        # claims coverage it does not have.
+        report.ran("CM-3")
+        report.add(Finding(
+            "CM-3", WARN, {"path": "metadata/codemeta.json"}, ["path"],
+            "codemeta.json was NOT checked the way Software Heritage processes "
+            "it (the JSON-LD engine is unavailable), so a context that SWH "
+            "would silently reject could pass unnoticed.",
+            message_technical="pyld not installed; CM-3 JSON-LD expand/compact "
+            "not performed. Install the 'jsonld' extra so CM-3 enforces.",
+            required_approver_role="curator",
+            remediation="Install pyld (validator 'jsonld' extra) and re-run, "
+            "or accept the unverified @context at your own risk.",
+        ))
         return
     if not cm2_ok:
         report.skip("CM-3", "context not in accepted set (CM-2 FAIL); cannot expand offline")
