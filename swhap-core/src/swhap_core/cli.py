@@ -12,7 +12,7 @@ import json
 import sys
 
 from . import __version__
-from .errors import EXIT_INTERNAL, EXIT_OK, EXIT_USAGE
+from .errors import EXIT_INTERNAL, EXIT_OK, EXIT_USAGE, SwhapError
 from .inspect import ExtractionPolicy, inspect_archive
 
 
@@ -60,6 +60,84 @@ def cmd_inspect(args: argparse.Namespace) -> int:
     return worst
 
 
+def cmd_build(args: argparse.Namespace) -> int:
+    # late import: keeps the inspect slice free of the history/journal modules.
+    from .history import do_apply, do_build, do_plan
+    from .journal import new_ulid
+    from .model import CurationTimestamp
+
+    cts = None
+    if args.curation_epoch is not None:
+        cts = CurationTimestamp(args.curation_epoch, args.curation_offset)
+
+    try:
+        if args.plan and args.apply:
+            sys.stderr.write("swhap build: choose at most one of --plan / --apply\n")
+            return EXIT_USAGE
+        if args.plan:
+            if cts is None:
+                sys.stderr.write("swhap build --plan needs --curation-epoch\n")
+                return EXIT_USAGE
+            plan, _ = do_plan(args.workbench, args.model, cts, plan_out=args.plan_file)
+            _emit(_plan_summary(plan))
+            return EXIT_OK
+        if args.apply:
+            run_id = args.run_id or new_ulid()
+            plan, result = do_apply(
+                args.workbench,
+                run_id=run_id,
+                model_name=args.model,
+                curation_ts=cts,
+                plan_path=args.plan_file,
+                scratch=args.scratch,
+            )
+            _emit(_apply_summary(plan, result))
+            return EXIT_OK
+        # full build (plan + apply)
+        if cts is None:
+            sys.stderr.write("swhap build needs --curation-epoch (no wall-clock fallback; D4)\n")
+            return EXIT_USAGE
+        if not args.model:
+            sys.stderr.write("swhap build needs --model P|G\n")
+            return EXIT_USAGE
+        run_id = args.run_id or new_ulid()
+        plan, result = do_build(
+            args.workbench, args.model, cts, run_id=run_id, scratch=args.scratch, plan_out=args.plan_file
+        )
+        _emit(_apply_summary(plan, result))
+        return EXIT_OK
+    except SwhapError as exc:
+        sys.stderr.write(f"swhap build: [{exc.code}] {exc.message}\n")
+        return exc.exit_code
+    except Exception as exc:  # pragma: no cover - defensive
+        sys.stderr.write(f"swhap build: internal error: {exc}\n")
+        return EXIT_INTERNAL
+
+
+def _plan_summary(plan) -> dict:
+    return {
+        "schema": "swhap-core/build/v1",
+        "phase": "plan",
+        "model": plan.model,
+        "curation_timestamp": {"epoch": plan.curation_epoch, "offset": plan.curation_offset},
+        "releases": [{"dirname": s.dirname, "release_tag": s.release_tag} for s in plan.steps],
+    }
+
+
+def _apply_summary(plan, result) -> dict:
+    return {
+        "schema": "swhap-core/build/v1",
+        "phase": "apply",
+        "model": result.model,
+        "run_id": result.run_id,
+        "scratch": result.scratch,
+        "branch_ref": result.branch_ref,
+        "branch_tip": result.branch_tip,
+        "commits": result.commits,
+        "tags": result.tags,
+    }
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="swhap", description="SWHAP Layer-1 toolkit")
     parser.add_argument("--version", action="version", version=f"swhap-core {__version__}")
@@ -72,6 +150,22 @@ def build_parser() -> argparse.ArgumentParser:
     p_inspect.add_argument("--json", action="store_true", help="emit JSON (default and only format)")
     p_inspect.add_argument("--policy", metavar="FILE", help="JSON policy/budget overrides")
     p_inspect.set_defaults(func=cmd_inspect)
+
+    p_build = sub.add_parser(
+        "build",
+        help="reconstruct curated Git history into candidate refs (plan/apply; D4 reproducible)",
+    )
+    p_build.add_argument("--workbench", required=True, metavar="DIR")
+    p_build.add_argument("--model", choices=["P", "G"], help="branch model (P=orphan purity, G=default-branch)")
+    p_build.add_argument("--plan", action="store_true", help="emit plan only; touch no refs")
+    p_build.add_argument("--apply", action="store_true", help="apply (needs --plan-file or --curation-epoch+--model)")
+    p_build.add_argument("--plan-file", metavar="FILE", help="plan.json path (written by --plan, read by --apply)")
+    p_build.add_argument("--curation-epoch", type=int, metavar="N", help="fixed D4 curation epoch (committer/tagger date)")
+    p_build.add_argument("--curation-offset", default="+0000", metavar="±HHMM")
+    p_build.add_argument("--run-id", metavar="ID", help="candidate-ref run id (default: a fresh ULID)")
+    p_build.add_argument("--scratch", action="store_true", help="write to refs/scratch/** (rebuild-compare; not journaled)")
+    p_build.add_argument("--json", action="store_true", help="emit JSON (default and only format)")
+    p_build.set_defaults(func=cmd_build)
     return parser
 
 
