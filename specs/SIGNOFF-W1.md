@@ -38,7 +38,9 @@ RULE NOW:
 
 Deferred-with-default (default in force unless you say otherwise):
 - [ ] Q9 year-only = Jan-1-UTC pin vs explicit unknown-within-year sentinel — pin is the default.
-- [ ] Wild_LIFE 1.02 `1995` is a placeholder; real value set at exemplar T3 from tar mtimes (fixture V4 updated if a full date proves defensible).
+- [x] Wild_LIFE 1.02 date — **RESOLVED 2026-06-06 (Roberto): year-only `1994`**
+  from the tar-mtime evidence; the `1995` placeholder retired; conformance
+  example V4 updated (decision D10 in analysis/decisions.md).
 
 ---
 

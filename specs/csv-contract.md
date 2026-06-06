@@ -228,7 +228,7 @@ stored precision**, byte-exactly:
 | `year` | `YYYY` | never expanded to a date or timestamp |
 
 Precision expansion is forbidden: re-serializing a `year`-precision value
-(e.g. row V4's `1995`) as `1995-01-01T00:00:00+00:00` destroys the
+(e.g. row V4's `1994`) as `1994-01-01T00:00:00+00:00` destroys the
 precision/provenance signal in the published CSV and is a conformance
 violation, even though the bytes would re-parse. Round-trip laws: parse →
 write → parse is the identity on `(epoch_seconds, utc_offset, precision)`;
@@ -697,7 +697,7 @@ directory name,date,author name,author email,curator name,curator email,release 
 
 License copyright year updated 1992 -> 1993.
 Co-authored-by: Peter Van Roy <pvr@noreply.example.org>"
-1.02,1995,Wild_LIFE authors,wildlife-authors@noreply.example.org,Roberto Di Cosmo,roberto@dicosmo.org,v1.02,Wild_LIFE 1.02 (Ultrix port; author-supplied tarball via PR #1)
+1.02,1994,Wild_LIFE authors,wildlife-authors@noreply.example.org,Roberto Di Cosmo,roberto@dicosmo.org,v1.02,Wild_LIFE 1.02 (Ultrix port; author-supplied tarball via PR #1)
 Softi-1968,1968-07-01,Softi authors,softi-authors@noreply.example.org,Example Curator,example-curator@noreply.example.org,v1968,Softi for CEP — pre-epoch author date exercise
 2.0-beta,1996-11-05T14:30:00+01:00,"Hervé, Jean-Claude",jc-herve@noreply.example.org,Example Curator,example-curator@noreply.example.org,2.0-beta,- full timestamp with offset; quoted comma in author name; leading-dash message
 ```
@@ -707,7 +707,7 @@ Softi-1968,1968-07-01,Softi authors,softi-authors@noreply.example.org,Example Cu
 | V1 (`0.90`) | date-only ⇒ UTC midnight, precision `day`, flagged (§4.1); collective author label + placeholder email (§5.1); curator real-email opt-in (§5.2); `v` tag convention (§6.3) |
 | V2 (`0.91`) | **same date as V1** — equal dates legal, row order authoritative (§7, the Wild_LIFE case) |
 | V3 (`1.0`) | RFC 4180 quoted multi-line message with blank line + `Co-authored-by` trailer (§2.4, §9.2–9.3) |
-| V4 (`1.02`) | **year-only** `1995`: internal instant `1995-01-01T00:00:00+00:00`, precision `year`, provenance **inferred** (§4.1); **re-serialized back to exactly `1995`** — never expanded to a timestamp (§4.6; the live Q9 exercise — exact value confirmed at exemplar T3) |
+| V4 (`1.02`) | **year-only** `1994`: internal instant `1994-01-01T00:00:00+00:00`, precision `year`, provenance **inferred** (§4.1); **re-serialized back to exactly `1994`** — never expanded to a timestamp (§4.6). Value RULED by Roberto 2026-06-06 from the tar-mtime evidence (fixtures/wildlife/manifests/1.02-date-evidence.md): real source mtimes top out at 1994-12-01; the earlier `1995` placeholder rested on unconfirmed external corroboration |
 | V5 (`Softi-1968`) | pre-1970 date ⇒ negative epoch via raw `@<epoch>` (§4.4, crit-M3) |
 | V6 (`2.0-beta`) | full timestamp with non-UTC offset (§4.1/§4.2); quoted embedded comma in a name (§2.4); bare tag (no `v`) = INFO only (§6.3); message with leading `-` (§8.1 exemption); non-ASCII UTF-8 (`é`) |
 
