@@ -77,6 +77,17 @@ def run_validation(workdir, profile, gate, *, manifests=None,
     default = ctx.default_branch()
     csv_bytes = ctx.read_path(f"refs/heads/{default}", "metadata/version_history.csv") if default else None
     codemeta_bytes = ctx.read_path(f"refs/heads/{default}", "metadata/codemeta.json") if default else None
+    # FIX-2 (AX5/T10): the legacy audit profile must tolerate the documented
+    # installed-base convention of a root-level codemeta.json (external.md C8 —
+    # SWH indexing expects codemeta at the repo root). DT2SG-era acquisitions
+    # ship codemeta.json at the repo root with NO metadata/codemeta.json; the
+    # strict reader then raised a CM-1 "missing" FALSE failure under the legacy
+    # profile. So in legacy only, fall back to a root-level codemeta.json when
+    # the canonical metadata/ location is absent. The strict-P/strict-G profiles
+    # are unchanged: codemeta MUST live in metadata/ there. CM-2..4 (e.g. the
+    # bogus-@context true defect) still apply to whichever file is found.
+    if (profile == profiles.LEGACY and codemeta_bytes is None and default):
+        codemeta_bytes = ctx.read_path(f"refs/heads/{default}", "codemeta.json")
     journal_bytes = None
     if default:
         journal_bytes = ctx.read_path(f"refs/heads/{default}", "metadata/journal.jsonl") \
