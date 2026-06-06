@@ -21,12 +21,11 @@ Determinism (D4) and curatorial invariants applied here:
 
 from __future__ import annotations
 
-import csv
 import hashlib
-import io
 import os
 
-from ..errors import CsvContractError, HistoryError
+from .. import vhcsv
+from ..errors import HistoryError
 from ..model import (
     EMPTYDIR_MARKER,
     MODE_EXEC,
@@ -36,24 +35,9 @@ from ..model import (
     CurationTimestamp,
     Identity,
     Release,
+    ReleaseDate,
     TreeEntry,
 )
-from .dates import parse_date
-
-CANONICAL_HEADER = (
-    "directory name,date,author name,author email,"
-    "curator name,curator email,release tag,commit message"
-)
-_COLS = [
-    "directory name",
-    "date",
-    "author name",
-    "author email",
-    "curator name",
-    "curator email",
-    "release tag",
-    "commit message",
-]
 
 
 def _sha256(b: bytes) -> str:
@@ -117,37 +101,17 @@ def _walk_release_tree(root: str) -> tuple[TreeEntry, ...]:
     return tuple(entries)
 
 
-def read_version_history(csv_bytes: bytes) -> list[dict]:
-    """Parse canonical ``version_history.csv`` bytes → ordered row dicts.
+def _release_date(pd: vhcsv.ParsedDate) -> ReleaseDate:
+    """Adapt a canonical :class:`vhcsv.ParsedDate` to the builder's
+    :class:`~swhap_core.model.ReleaseDate` (the git author-date carrier).
 
-    Byte-exact header check (CSV-1); RFC-4180 quoting; CRLF tolerated on read.
-    This is the builder-local reader; ``swhap_core.vhcsv`` is the canonical one.
+    This is builder glue, **not** date grammar: vhcsv already parsed and validated
+    the §4 date column. We only re-shape the validated triple, taking the raw
+    ``±HHMM`` offset from ``git_author_date`` so the author-date bytes are
+    byte-identical to what git plumbing writes (D4).
     """
-    text = csv_bytes.decode("utf-8")
-    first_nl = text.find("\n")
-    header = text[:first_nl] if first_nl >= 0 else text
-    header = header.rstrip("\r")
-    if header != CANONICAL_HEADER:
-        if header.startswith("﻿"):
-            raise CsvContractError("file starts with a UTF-8 BOM — remove it", code="CSV-HEADER")
-        raise CsvContractError(
-            f"version_history.csv header is not byte-exact (got {header!r})", code="CSV-HEADER"
-        )
-    rows = []
-    reader = csv.reader(io.StringIO(text))
-    for i, fields in enumerate(reader):
-        if i == 0:
-            continue
-        if not fields:
-            continue
-        if len(fields) != 8:
-            raise CsvContractError(
-                f"row {i}: expected 8 fields, got {len(fields)}", code="CSV-FIELD", row=i
-            )
-        rows.append(dict(zip(_COLS, fields)))
-    if not rows:
-        raise CsvContractError("no data rows (an acquisition with zero releases)", code="CSV-FIELD")
-    return rows
+    raw_offset = pd.git_author_date().rsplit(" ", 1)[1]  # "@<epoch> ±HHMM" → "±HHMM"
+    return ReleaseDate(epoch=pd.epoch_seconds, offset=raw_offset, precision=pd.precision)
 
 
 def build_model(
@@ -165,23 +129,21 @@ def build_model(
         )
     with open(csv_path, "rb") as fh:
         csv_bytes = fh.read()
-    rows = read_version_history(csv_bytes)
 
-    seen_dir: set[str] = set()
-    seen_tag: set[str] = set()
+    # vhcsv is the SOLE canonical parser (decision D2): header (CSV-1), RFC-4180
+    # structure/arity (CSV-2/CSV-6), the §4 date grammar (CSV-3), the §6 tag
+    # grammar (CSV-4), §7 collision-folded uniqueness (CSV-5) and the §8 field
+    # allowlist + §5.3 email syntax (CSV-6) are all enforced HERE, at ingestion,
+    # before any git plumbing runs. raise_on_fail() surfaces the first FAIL as the
+    # real CsvContractError (exit 12) — a malformed tag or injection-shaped field
+    # is rejected up front, never deferred to a late HB-PLAN-DRIFT inside git.
+    parsed = vhcsv.parse(csv_bytes, profile="canonical")
+    parsed.raise_on_fail()
+    rows = parsed.rows
+
     releases: list[Release] = []
     for row in rows:
-        dirname = row["directory name"]
-        tag = row["release tag"]
-        fold_d = dirname.casefold()
-        fold_t = tag.casefold()
-        if fold_d in seen_dir:
-            raise CsvContractError(f"duplicate directory name {dirname!r}", code="CSV-DUP-DIR")
-        if fold_t in seen_tag:
-            raise CsvContractError(f"duplicate release tag {tag!r}", code="CSV-DUP-TAG")
-        seen_dir.add(fold_d)
-        seen_tag.add(fold_t)
-
+        dirname = row.directory_name
         rel_dir = os.path.join(wb, source_root, dirname)
         if not os.path.isdir(rel_dir):
             raise HistoryError(
@@ -193,15 +155,15 @@ def build_model(
         releases.append(
             Release(
                 dirname=dirname,
-                tag=tag,
-                message=row["commit message"],
-                author=Identity(row["author name"], row["author email"]),
-                author_date=parse_date(row["date"]),
+                tag=row.release_tag,
+                message=row.commit_message,
+                author=Identity(row.author_name, row.author_email),
+                author_date=_release_date(row.date),
                 entries=entries,
             )
         )
 
-    curator = Identity(rows[0]["curator name"], rows[0]["curator email"])
+    curator = Identity(rows[0].curator_name, rows[0].curator_email)
     # Model-G base metadata: the workbench metadata that co-locates with source on
     # the default branch. version_history.csv is canonical; README.md if present.
     metadata_files: list[TreeEntry] = [

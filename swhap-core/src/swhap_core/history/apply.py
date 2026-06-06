@@ -1,14 +1,20 @@
 """APPLY stage — write a ``BuildPlan`` into refs via git plumbing (D4).
 
-Plumbing only — ``hash-object`` / ``mktree`` / ``commit-tree`` / ``mktag`` /
-``update-ref`` — never a worktree or index, so no umask / mtime / locale
-nondeterminism enters (crit-M5). Bit-reproducibility (D4) is guaranteed by:
+Plumbing only — ``hash-object`` / ``mktree`` / ``update-ref`` — never a worktree
+or index, so no umask / mtime / locale nondeterminism enters (crit-M5). Commit and
+annotated-tag objects are composed byte-for-byte and written with
+``git hash-object --literally -t commit|tag`` (see ``gitio``), never ``commit-tree``
+/ ``mktag``, so git's date *front-end* is never consulted (the crit-M3 pre-1970
+failure class). Bit-reproducibility (D4) is guaranteed by:
 
 - deterministic tree assembly (``git mktree`` canonical-orders entries; explicit
   modes; ``.emptydir`` for empty dirs; symlinks as 120000 blobs);
-- ``GIT_AUTHOR_DATE`` = the per-release CSV date (raw ``@<epoch> ±HHMM`` — pre-1970
-  epochs are negative, crit-M3);
-- ``GIT_COMMITTER_DATE`` and the tagger date = the single fixed curation timestamp;
+- the author-date line = the per-release CSV date written straight into the object
+  body as raw ``@<epoch> ±HHMM`` (pre-1970 epochs are negative, crit-M3) — NOT a
+  ``GIT_AUTHOR_DATE`` env var (env vars are not load-bearing; ``gitio`` writes the
+  raw epoch into the commit/tag body directly);
+- the committer-date line and the tagger date = the single fixed curation
+  timestamp, likewise written into the object body, not via ``GIT_COMMITTER_DATE``;
 - stable identity strings, fixed offset formatting, no wall-clock anywhere.
 
 Identical inputs ⇒ identical commit **and** annotated-tag object SHA-1s, across

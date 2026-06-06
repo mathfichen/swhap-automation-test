@@ -32,9 +32,11 @@ MODEL_VERSION = "swhap-acqmodel/1"
 
 @dataclass(frozen=True)
 class Identity:
-    """A git identity (author or curator). ``name``/``email`` reach git only via
-    environment (``GIT_AUTHOR_*`` / ``GIT_COMMITTER_*``) and the tagger line on
-    stdin — never argv — so a leading ``-`` or other content is inert (C1)."""
+    """A git identity (author or curator). ``name``/``email`` reach git only
+    inside the commit/tag object body composed on stdin (``gitio`` writes the
+    identity line straight into the object via ``git hash-object --literally``) —
+    never argv, and never via ``GIT_AUTHOR_*`` / ``GIT_COMMITTER_*`` env vars — so
+    a leading ``-`` or other content is inert (C1)."""
 
     name: str
     email: str
@@ -63,11 +65,14 @@ class CurationTimestamp:
 
 @dataclass(frozen=True)
 class ReleaseDate:
-    """A historical release date as ``GIT_AUTHOR_DATE`` (csv-contract §4.3).
+    """A historical release date — the commit's author-date (csv-contract §4.3).
 
-    ``epoch`` is the true UTC instant (negative for pre-1970, crit-M3);
-    ``offset`` is the preserved ``±HHMM`` for faithful author-date rendering;
-    ``precision`` is ``second|day|year`` and propagates to the provenance ledger.
+    Rendered as the raw ``@<epoch> ±HHMM`` author-date line written directly into
+    the commit object body by ``gitio`` (``git hash-object --literally``); it is
+    NOT fed through a ``GIT_AUTHOR_DATE`` env var (env vars are not load-bearing).
+    ``epoch`` is the true UTC instant (negative for pre-1970, crit-M3); ``offset``
+    is the preserved ``±HHMM`` for faithful author-date rendering; ``precision`` is
+    ``second|day|year`` and propagates to the provenance ledger.
     """
 
     epoch: int

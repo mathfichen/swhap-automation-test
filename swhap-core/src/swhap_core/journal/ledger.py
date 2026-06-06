@@ -84,6 +84,11 @@ def machine_actor() -> dict:
 
 
 def _now_ts() -> str:
+    # journal-schema §4 (Timestamp policy): ts is REAL wall-clock UTC, deliberately
+    # OUTSIDE the D4 commit/tag-hash envelope. The journal is intentionally NOT
+    # byte-reproducible (wall-clock ts + random ULID id) — do NOT "fix" this to be
+    # deterministic; D4 reproducibility is carried by the curation-timestamp entry,
+    # and two rebuilds with differing ts + identical outputs ARE the evidence of it.
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 

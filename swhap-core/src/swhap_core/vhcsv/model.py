@@ -79,9 +79,10 @@ class ParsedDate:
         return _fmt_offset(self.offset_minutes)
 
     def git_author_date(self) -> str:
-        """Raw ``@<epoch> ±HHMM`` form passed to git plumbing via env (§4.4) —
-        never a formatted date string (the crit-M3 DT2SG/libgit2 failure
-        class)."""
+        """Raw ``@<epoch> ±HHMM`` form written directly into the commit/tag object
+        body by git plumbing (``git hash-object --literally``; §4.4) — never a
+        formatted date string, and never via a ``GIT_AUTHOR_DATE`` env var (the
+        crit-M3 DT2SG/libgit2 failure class)."""
         return f"@{self.epoch_seconds} {_fmt_raw_offset(self.offset_minutes)}"
 
     def serialize(self) -> str:

@@ -16,7 +16,7 @@ import subprocess
 import pytest
 
 from swhap_core.cli import main
-from swhap_core.errors import HistoryError
+from swhap_core.errors import CsvContractError, HistoryError
 from swhap_core.gitio import GitRunner
 from swhap_core.history import build_model, do_apply, do_build, do_plan, render_g, render_p
 from swhap_core.model import CurationTimestamp
@@ -279,3 +279,67 @@ def test_cli_build_requires_curation_epoch(tmp_path, capsys):
     root = _make_workbench(str(tmp_path / "noepoch"))
     rc = main(["build", "--workbench", root, "--model", "P"])
     assert rc == 2  # usage: no wall-clock fallback (D4)
+
+
+# --- D2: the single canonical parser rejects bad CSV at INGESTION ------------
+# The builder routes through swhap_core.vhcsv (profile="canonical") as the SOLE
+# parser. Tag-grammar (§6 / CSV-TAG = validator CSV-4), field-allowlist (§8 /
+# CSV-FIELD = validator CSV-6) and §5.3 email syntax are therefore enforced at
+# plan time, before any git plumbing runs — never deferred to a late, misleading
+# HB-PLAN-DRIFT inside git. The source trees here are always well-formed, so the
+# ONLY thing that can fail is the CSV contract.
+_ONE_ROW_CSV = (
+    "directory name,date,author name,author email,curator name,curator email,release tag,commit message\n"
+    "0.90,1993-08-09,Wild_LIFE authors,{email},Roberto Di Cosmo,roberto@dicosmo.org,{tag},Wild_LIFE 0.90\n"
+)
+
+
+def _make_one_row_wb(root, *, tag="v0.90", email="wildlife-authors@noreply.example.org"):
+    os.makedirs(os.path.join(root, "metadata"))
+    sc = os.path.join(root, "source_code", "0.90")
+    os.makedirs(sc)
+    with open(os.path.join(sc, "README"), "wb") as fh:
+        fh.write(b"life 0.90\n")
+    with open(os.path.join(root, "metadata", "version_history.csv"), "w") as fh:
+        fh.write(_ONE_ROW_CSV.format(tag=tag, email=email))
+    subprocess.run(["git", "init", "-q", root], check=True)
+    return root
+
+
+def test_injection_tag_rejected_at_plan_not_plan_drift(tmp_path):
+    # An argv-injection-shaped release tag is rejected up front as a CSV-contract
+    # FAIL (exit 12) by the canonical vhcsv parser — NOT deferred to HB-PLAN-DRIFT
+    # (exit 13) inside git, which is what the weaker builder-local reader did.
+    wb = _make_one_row_wb(str(tmp_path / "inj"), tag="--upload-pack=HEAD")
+    with pytest.raises(CsvContractError) as ei:
+        do_plan(wb, "P", CURATION, journal=False)
+    assert ei.value.exit_code == 12
+    assert ei.value.code != "HB-PLAN-DRIFT"
+    # `git check-ref-format refs/tags/--upload-pack=HEAD` actually *accepts* this
+    # string, so the §6.1 tag grammar is clean; the leading '-' is caught by the
+    # §8.1 field allowlist (validator CSV-6 / CSV-FIELD) instead.
+    assert ei.value.code == "CSV-FIELD"
+    # the failure happens at ingestion, so no candidate/scratch refs were created
+    git = GitRunner(wb)
+    refs = git.run(["for-each-ref", "--format=%(refname)"]).decode().splitlines()
+    assert not any(r.startswith(("refs/heads/candidate", "refs/tags/candidate")) for r in refs)
+
+
+def test_tag_grammar_violation_is_csv_tag_at_plan(tmp_path):
+    # A genuine §6.1 tag-grammar violation (a space is a check-ref-format forbidden
+    # char) is CSV-TAG (validator CSV-4), raised at plan time, not at apply time.
+    wb = _make_one_row_wb(str(tmp_path / "badtag"), tag="v 1.0")
+    with pytest.raises(CsvContractError) as ei:
+        do_plan(wb, "P", CURATION, journal=False)
+    assert ei.value.code == "CSV-TAG"
+    assert ei.value.exit_code == 12
+
+
+def test_bad_email_rejected_at_plan(tmp_path):
+    # §5.3 bare addr-spec is now enforced at ingestion (the old builder-local reader
+    # never validated emails). A malformed author email fails CSV-FIELD at plan time.
+    wb = _make_one_row_wb(str(tmp_path / "bademail"), email="not-an-email")
+    with pytest.raises(CsvContractError) as ei:
+        do_plan(wb, "P", CURATION, journal=False)
+    assert ei.value.code == "CSV-FIELD"
+    assert ei.value.exit_code == 12
