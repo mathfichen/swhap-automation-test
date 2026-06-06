@@ -86,6 +86,26 @@ class Finding:
     def id(self) -> str:
         return make_finding_id(self.check_id, self.subject())
 
+    def _message_plain(self) -> str:
+        """Guarantee a non-empty, human-readable ``message_plain`` (schema
+        ``minLength: 1``; validator-report §2.6 "Required, non-empty").
+
+        A finding that serialized with an empty message left a forge-visible
+        result self-describing only by severity+id (the GAP-2 auditability hole).
+        The producer owns this invariant: if a check ever leaves ``message_plain``
+        empty, fall back to ``message_technical``; if that is empty too, synthesize
+        a generic but truthful line from the stable ``check_id`` + ``severity`` so
+        no finding is ever message-less. Findings that already carry a message are
+        unaffected (byte-identical output)."""
+        mp = self.message_plain
+        if mp is not None and str(mp).strip():
+            return mp
+        mt = self.message_technical
+        if mt is not None and str(mt).strip():
+            return mt
+        return (f"Check {self.check_id} reported a {self.severity}-level finding; "
+                "see the finding object and report details.")
+
     def to_dict(self) -> dict:
         d = {
             "id": self.id(),
@@ -93,7 +113,7 @@ class Finding:
             "severity": self.severity,
             "enforced": self.enforced,
             "object": self.object,
-            "message_plain": self.message_plain,
+            "message_plain": self._message_plain(),
             "required_approver_role": self.required_approver_role,
             "state": self.state,
         }

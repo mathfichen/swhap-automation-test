@@ -1,10 +1,25 @@
 """PI-1 — personal-email lint (crit-M15). WARN per Roberto's W1 ruling.
 
-A real (non-placeholder) personal email in the CSV author/curator fields warns;
-a journaled curator-email opt-in clears it entirely. The literal address is
-NEVER reproduced in the report regardless of severity (validator-report §2.5b):
-findings carry the salted-HMAC redaction token, with the literal domain only for
-public-provider addresses.
+A real (non-placeholder) personal email in the CSV author/curator fields warns.
+
+Opt-in policy (validator-report §2.5b; csv-contract §5.2; journal-schema §5.5/§6)
+— PI-1 is **opt-in clearing, never default clearing**:
+
+  * The finding is cleared (no PI-1 finding emitted) for a **curator email**
+    ONLY when the journal carries an EXPLICIT curator-approved opt-in: a
+    ``provenance-transition`` entry, by a ``curator``-kind actor, moving the item
+    ``pii.curator_email`` to state ``curator-approved`` (see ``_opt_in_present``).
+  * Absent that exact entry, the finding is ALWAYS emitted — there is no
+    by-default clearing, no env flag, no CLI switch, and no clearing for the
+    ``author email`` field at all. This is deliberate: a real email must never be
+    silently published for another acquisition just because some unrelated repo
+    once opted in. The opt-in is per-repo (the journal is the repo's ledger) and
+    per-item (``pii.curator_email`` only). It is NOT an ``ai-consent`` entry
+    (that carries AI-provider consent, a different concern).
+
+The literal address is NEVER reproduced in the report regardless of severity or
+opt-in (validator-report §2.5b): findings carry the salted-HMAC redaction token,
+with the literal domain only for public-provider addresses.
 """
 from __future__ import annotations
 

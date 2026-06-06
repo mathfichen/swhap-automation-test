@@ -19,9 +19,12 @@ from swhap_core.inspect import inspect_archive
 
 
 def _repo_root() -> str | None:
+    # Key on the COMMITTED index.json, not the gitignored archives/ dir, so
+    # collection succeeds on a clean clone (archives/ is materialized on demand
+    # by the autouse fixture below — see the order-dependence fix).
     d = os.path.dirname(os.path.abspath(__file__))
     while True:
-        if os.path.isdir(os.path.join(d, "fixtures", "negative", "archives")):
+        if os.path.isfile(os.path.join(d, "fixtures", "negative", "index.json")):
             return d
         parent = os.path.dirname(d)
         if parent == d:
@@ -44,6 +47,25 @@ def _corpus():
 
 _BASE, _DOC = _corpus()
 _FIXTURES = _DOC["fixtures"] if _DOC else []
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _materialize_negative_corpus():
+    """Build the gitignored fixtures/negative/archives/ from the committed
+    deterministic generator before the seam tests run, so a single clean-clone
+    pytest invocation yields the full parametrized run (no order-dependent skip:
+    index.json is committed → collection succeeds; archives are built here →
+    test bodies find them)."""
+    if _BASE is None:
+        return
+    archives = os.path.join(_BASE, "archives")
+    if not os.path.isdir(archives) or not os.listdir(archives):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "_neg_build", os.path.join(_BASE, "build.py"))
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        mod.build_all(archives)
 
 
 @pytest.mark.skipif(not _FIXTURES, reason="fixtures/negative corpus not present")

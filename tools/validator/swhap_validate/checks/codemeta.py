@@ -120,6 +120,9 @@ def run(report, repo_ctx, *, codemeta_bytes):
             "CM-4", INFO, {"term": "funder"}, ["term"],
             "This record uses 'funder' (the funding organization). 'funding' "
             "(the grant) is a distinct, optional field.",
+            message_technical="CM-4: 'funder' present without 'funding'; both are "
+            "valid CodeMeta 2.0 terms (funder = organization, funding = grant) — "
+            "informational, no action required.",
             required_approver_role="none",
         ))
 

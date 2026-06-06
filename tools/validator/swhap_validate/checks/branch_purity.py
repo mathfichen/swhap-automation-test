@@ -164,4 +164,12 @@ def _bp5(report, ctx, release_tags):
                     "BP-5", FAIL, {"tag": tag, "wrapper": top[0]}, ["tag"],
                     f"Release '{tag}' has an artificial top-level wrapper "
                     f"directory '{top[0]}' that should have been stripped.",
-                    required_approver_role=_ROLE))
+                    message_technical=(
+                        f"refs/tags/{tag}: tree root is the single directory "
+                        f"{top[0]!r} and every entry lives under it — the wrapper "
+                        "was not stripped on acquisition (brief wrapper-stripping "
+                        "invariant)"),
+                    required_approver_role=_ROLE,
+                    remediation=f"Re-acquire release '{tag}' with the wrapper "
+                    f"directory '{top[0]}' stripped so its contents sit at the "
+                    "release root."))

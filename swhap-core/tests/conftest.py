@@ -22,9 +22,12 @@ import pytest
 # ---------------------------------------------------------------------------
 # Wild_LIFE fixture location (consumed, never written)
 # ---------------------------------------------------------------------------
+# Precedence: explicit override, then the CLONE-RELATIVE path (so a clean clone
+# is genuinely self-isolated and never silently consumes another checkout's
+# tarballs). No hardcoded absolute dev path — it shadowed the clone-relative one
+# and broke clean-clone isolation on the dev machine.
 _WILDLIFE_CANDIDATES = [
     os.environ.get("SWHAP_WILDLIFE_DIR"),
-    "/home/dicosmo/code/swhap-toolkit/fixtures/wildlife/tarballs",
     os.path.join(os.path.dirname(__file__), "..", "..", "fixtures", "wildlife", "tarballs"),
 ]
 
