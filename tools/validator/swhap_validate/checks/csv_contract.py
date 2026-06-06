@@ -43,6 +43,10 @@ _CODE_TO_CHECK = {
     vhcsv.CSV_HEADER: "CSV-1",
     vhcsv.CSV_DATE: "CSV-3",
     vhcsv.CSV_TZ: "CSV-3",
+    # Legacy-only WARN (§11.3): an ambiguous US slash date the converter resolved
+    # to MM/DD. It is a date-grammar observation → CSV-3 (a WARN, never a FAIL):
+    # the US date format is a tolerated legacy dialect, not a defect.
+    vhcsv.CSV_AMBIGUOUS_US_DATE: "CSV-3",
     vhcsv.CSV_TAG: "CSV-4",
     vhcsv.CSV_DUP_DIR: "CSV-5",
     vhcsv.CSV_DUP_TAG: "CSV-5",
@@ -63,7 +67,24 @@ def _check_id(diag) -> str:
 
 
 def run(report, *, csv_bytes, profile, reference_date=None):
-    """Validate ``metadata/version_history.csv`` (canonical profile).
+    """Validate ``metadata/version_history.csv``.
+
+    Profile-aware parsing (FIX-1, AX5/T10): the **legacy** audit profile is
+    contractually required to *tolerate* the recognized legacy CSV dialects
+    (Unipisa/DT2SG + guide: date in col 4, ``*`` tag, ``|`` message separators —
+    csv-contract §11). For those targets the strict canonical parser raised a
+    CSV-1 ``CSV-HEADER`` FAIL ("not byte-exact") — a FALSE failure under the
+    legacy profile (validator-report §4.2 line 254: "legacy dialect accepted via
+    converter … canonical-header absence not a finding"). So in the legacy
+    profile we route a non-canonical header through the read-only legacy
+    converter (``vhcsv.parse(profile='legacy')``), which converts a recognized
+    dialect with zero FAILs and only FAILs (CSV-1) when the header matches NO
+    recognized dialect — preserving detection of a genuinely broken header.
+
+    A byte-exact canonical CSV is still held to the strict canonical grammar in
+    every profile (a canonical file is valid everywhere, and legacy auditing it
+    strictly catches real canonical defects). The strict-P/strict-G profiles are
+    unchanged: a legacy dialect there is still a CSV-1 FAIL.
 
     ``reference_date`` is the §4.5 future-date baseline. The CLI passes an int
     epoch (``cli._parse_reference_date``); we wrap it as a ``ParsedDate`` so the
@@ -84,18 +105,26 @@ def run(report, *, csv_bytes, profile, reference_date=None):
     # the core parser stops at the header diagnostic). Mirror that so the report
     # pass-count reflects which checks actually got to evaluate rows.
     first_line = csv_bytes.split(b"\n", 1)[0].rstrip(b"\r")
-    if first_line == CANONICAL_HEADER_BYTES:
+    is_canonical_header = first_line == CANONICAL_HEADER_BYTES
+    if is_canonical_header:
         for cid in ("CSV-2", "CSV-3", "CSV-4", "CSV-5", "CSV-6", "CSV-7"):
             report.ran(cid)
+
+    # Legacy audit profile + non-canonical header → read-only legacy converter.
+    use_legacy = (profile == "legacy") and not is_canonical_header
 
     ref = reference_date
     if isinstance(ref, int):
         ref = vhcsv.ParsedDate(ref, 0, "second")
 
-    result = vhcsv.parse(csv_bytes, profile="canonical", reference_date=ref)
+    if use_legacy:
+        result = vhcsv.parse(csv_bytes, profile="legacy")
+    else:
+        result = vhcsv.parse(csv_bytes, profile="canonical", reference_date=ref)
 
-    # Filter by SEVERITY, not code: surface FAIL + the CSV-7 WARN; drop the
-    # file-level INFO notes (csv-contract §10 — they affect nothing).
+    # Filter by SEVERITY, not code: surface FAIL + WARN (e.g. CSV-7 date order,
+    # or the legacy ambiguous-US-date WARN); drop the file-level INFO notes
+    # (csv-contract §10 — they affect nothing).
     for diag in result.diagnostics:
         if diag.severity not in (FAIL, WARN):
             continue

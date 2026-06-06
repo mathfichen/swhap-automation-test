@@ -71,6 +71,49 @@ def test_I3_legacy_header_csv1_hint():
     assert "legacy" in (f.message_technical or "").lower()
 
 
+# -- FIX-1 (AX5/T10): legacy CSV dialect tolerated in the legacy profile -----
+# A recognized Unipisa/DT2SG legacy CSV (date in col 4, `*` tag, `|` message
+# separators, US slash dates) is a tolerated dialect (csv-contract §11); it must
+# produce ZERO FAIL under the legacy profile, while still FAILing under strict
+# and a genuinely unrecognized header must still FAIL even under legacy.
+
+# Real installed-base shape (mirrors Unipisa/CMM-Workbench): unipisa header, a
+# `*` tag, `|`-separated message, and an ambiguous US MM/DD slash date.
+_LEGACY_UNIPISA = (
+    "directory name,author name,author email,date,"
+    "curator name,curator email,release tag,commit message\n"
+    "1.3,Giuseppe Attardi,attardi@di.unipi.it,11/07/1994 17:36:34,"
+    "CMM Curation Team,guido.scatena@unipi.it,*,"
+    '"|Contributors:| - Giuseppe Attardi"\n'
+).encode("utf-8")
+
+
+def test_FIX1_legacy_dialect_zero_fail_in_legacy_profile():
+    """The false alarm: a recognized legacy dialect raised CSV-1 FAIL before the
+    fix. Under the legacy profile it must now produce zero FAIL of any kind."""
+    rep = run(raw=_LEGACY_UNIPISA, profile="legacy")
+    assert not [f for f in rep.findings if f.severity == FAIL]
+    # The US slash date is surfaced informationally, never as a FAIL.
+    warns = [f for f in rep.findings if f.severity == WARN]
+    assert any(f.check_id == "CSV-3" for f in warns)
+
+
+def test_FIX1_legacy_dialect_still_fails_in_strict():
+    """Detection is not weakened: the same legacy dialect is still a CSV-1 FAIL
+    under the strict profiles (the dialect is never written, D2)."""
+    for prof in ("strict-P", "strict-G"):
+        rep = run(raw=_LEGACY_UNIPISA, profile=prof)
+        assert checks(rep, "CSV-1") and checks(rep, "CSV-1")[0].severity == FAIL
+
+
+def test_FIX1_unrecognized_header_still_fails_in_legacy():
+    """Detection is not weakened: a header matching NO recognized dialect is a
+    real defect and must still FAIL CSV-1 even under the legacy profile."""
+    raw = b"version,date,source_url,filename,sha256,authors,notes\n"
+    rep = run(raw=raw, profile="legacy")
+    assert checks(rep, "CSV-1") and checks(rep, "CSV-1")[0].severity == FAIL
+
+
 # -- I4..I6 dates (CSV-3) ----------------------------------------------------
 
 def test_I4_naive_timestamp_csv3():

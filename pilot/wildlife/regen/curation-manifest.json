@@ -1,0 +1,172 @@
+{
+  "schema": "swhap-curation-manifest/1",
+  "exemplar": "Wild_LIFE",
+  "purpose": "Drives the deterministic Model-P regeneration of the Wild_LIFE SWHAP workbench (exemplar-pilot T11/T13, M1 exit gate). Single source of truth for the curatorial decisions: regen.py seeds metadata/journal.jsonl from the `decisions` and `provenance` lists below, so the ledger is a pure function of this committed file.",
+  "ratification": {
+    "by": "Roberto Di Cosmo",
+    "role": "curator",
+    "on": "2026-06-06",
+    "ref": "swhap-automation/analysis/decisions.md §1.02-RATIFY",
+    "decision_count": 6,
+    "note": "All six curatorial decisions are CURATOR-APPROVED. The provenance transitions below reach curator-approved (no longer user-provided/pending); the validator's PI-1 opt-in and the human-in-the-loop gate are thereby satisfied."
+  },
+  "curation_timestamp": {
+    "epoch": 1781049600,
+    "offset": "+0000",
+    "iso": "2026-06-10T00:00:00+00:00",
+    "note": "D4 fixed curation timestamp — ONE value for the build (committer+tagger date). Identical inputs => identical commit+tag object hashes."
+  },
+  "curator": {
+    "name": "Roberto Di Cosmo",
+    "email": "roberto@dicosmo.org"
+  },
+  "author_label": {
+    "name": "Wild_LIFE authors",
+    "email": "wildlife-authors@noreply.example.org"
+  },
+  "build": {
+    "model": "P",
+    "run_id": "00000000000000000000000P01"
+  },
+  "releases": [
+    {
+      "directory_name": "0.90",
+      "tarball": "life_090.tgz",
+      "sha256": "928453daa1ae1477113f323b2d98d3920d15999d8ed7d496f0b606598592df19",
+      "wrapper": "Life/",
+      "release_tag": "v0.90",
+      "date": "1993-08-09",
+      "date_precision": "day",
+      "curate": {"exclude_appledouble": false, "preserve_symlinks": true},
+      "expected": {}
+    },
+    {
+      "directory_name": "0.91",
+      "tarball": "life_091.tgz",
+      "sha256": "dbf206afbd22b57070a484687e24548efd66754397b81661121bc2de70ae5ce6",
+      "wrapper": "Life/",
+      "release_tag": "v0.91",
+      "date": "1993-08-09",
+      "date_precision": "day",
+      "curate": {"exclude_appledouble": false, "preserve_symlinks": true},
+      "expected": {}
+    },
+    {
+      "directory_name": "1.0",
+      "tarball": "life_10.tgz",
+      "sha256": "c8d3d7c72e9eeab2b6124348bc5e4b8f15d69c1fd29b35768251751a505a670e",
+      "wrapper": "Life1.0/",
+      "release_tag": "v1.0",
+      "date": "1994-03-24",
+      "date_precision": "day",
+      "curate": {"exclude_appledouble": false, "preserve_symlinks": true},
+      "expected": {}
+    },
+    {
+      "directory_name": "1.02",
+      "tarball": "Life1.02Ultrix.tar",
+      "sha256": "0e43f8296db6ba490d551d8ae4fc56eb684231b0a143e26c705076f21f543763",
+      "wrapper": "Life1.02Ultrix/",
+      "release_tag": "v1.02",
+      "date": "1994",
+      "date_precision": "year",
+      "curate": {"exclude_appledouble": true, "preserve_symlinks": true},
+      "expected": {
+        "appledouble_removed": 256,
+        "stray_removed": ["._Life1.02Ultrix"],
+        "abs_symlinks": [
+          {"path": "Examples", "target": "/home/ps-home/vanroy/Life1.01/Examples"},
+          {"path": "Lib", "target": "/home/ps-home/vanroy/Life1.01/Lib"},
+          {"path": "RCS", "target": "/udir/rmeyer/LIFE/MODULE/RCS"},
+          {"path": "Tests", "target": "/home/ps-home/vanroy/Life1.01/Tests"}
+        ],
+        "rel_symlink_count": 65,
+        "manifest_counts": {"files": 183, "symlinks": 69, "empty_dirs": 0, "entries": 252}
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "id": "D-1.02-appledouble",
+      "summary": "Exclude the 257 macOS AppleDouble resource-fork files from the curated 1.02 tree.",
+      "provenance_transition": {"item": "curation.1.02.appledouble_exclusion", "from": null, "to": "curator-approved"},
+      "details": {
+        "release": "1.02",
+        "decision": "EXCLUDE",
+        "note": "Excluded 256 macOS AppleDouble '._*' companion files under the wrapper plus the stray top-level sibling ._Life1.02Ultrix (257 total). Rationale: resource-fork/metadata noise from a macOS re-packaging (2010/2017 mtimes), NOT 1994 source content. The original tarball stays byte-identical in raw_materials/.",
+        "ratified": true
+      }
+    },
+    {
+      "id": "D-1.02-absolute-symlinks",
+      "summary": "Preserve the 4 author-machine absolute-target symlinks verbatim as documented broken-link artifacts.",
+      "provenance_transition": {"item": "curation.1.02.absolute_symlinks", "from": null, "to": "curator-approved"},
+      "details": {
+        "release": "1.02",
+        "decision": "PRESERVE-AS-BROKEN-ARTIFACT",
+        "note": "4 top-level symlinks (Examples, Lib, RCS, Tests) target absolute paths on the original author machine (/home/ps-home/vanroy/..., /udir/rmeyer/...), outside the extraction tree. They cannot be rewritten relative-inside (referents absent). Preserved VERBATIM as documented broken-symlink artifacts (120000 blob = the absolute target bytes; never followed, never executed).",
+        "ratified": true
+      }
+    },
+    {
+      "id": "D-1.02-relative-symlinks",
+      "summary": "Preserve the 65 in-tree relative symlinks verbatim.",
+      "provenance_transition": {"item": "curation.1.02.relative_symlinks", "from": null, "to": "curator-approved"},
+      "details": {
+        "release": "1.02",
+        "decision": "PRESERVE",
+        "note": "The 65 relative symlinks all resolve structurally inside the curated tree and are preserved verbatim (120000 blobs).",
+        "ratified": true
+      }
+    },
+    {
+      "id": "D-1.02-perm-flattening",
+      "summary": "Document (do not 'fix') the flattened 0o777 permission bits.",
+      "provenance_transition": {"item": "curation.1.02.perm_flattening", "from": null, "to": "curator-approved"},
+      "details": {
+        "release": "1.02",
+        "decision": "DOCUMENT-NO-ACTION",
+        "note": "All regular-file permission bits are 0o777 (Ultrix/macOS extraction artifact). The builder maps the exec bit uniformly to git 100755; TF-2 collapses the exec bit for regular files, so this systematic flattening is documented, not a per-file corruption.",
+        "ratified": true
+      }
+    },
+    {
+      "id": "D-curator-email",
+      "summary": "Curator confirms publication of his real email into immutable SWH-archived history (clears PI-1).",
+      "provenance_transition": {"item": "pii.curator_email", "from": "user-provided", "to": "curator-approved"},
+      "details": {
+        "item": "pii.curator_email",
+        "note": "Curator opts in to publishing roberto@dicosmo.org into immutable SWH-archived history (brief-§8 precedent). The PI-1 WARN is thereby cleared. This provenance-transition is the SOLE carrier of the opt-in (csv-contract §5.2).",
+        "ratified": true
+      }
+    },
+    {
+      "id": "D-release-dates",
+      "summary": "Accept the inferred release dates (0.90/0.91 = 1993-08-09, 1.0 = 1994-03-24, 1.02 = 1994 year-only).",
+      "provenance_transition": {"item": "release_dates", "from": null, "to": "curator-approved"},
+      "details": {
+        "decision": "ACCEPT-INFERRED",
+        "provenance": "inferred",
+        "dates": {
+          "0.90": {"date": "1993-08-09", "precision": "day", "evidence": "CMU AI-repository listing date; tarball regfile mtimes 1992-12-08..09 predate the listing (listing date, not a per-file release date)."},
+          "0.91": {"date": "1993-08-09", "precision": "day", "evidence": "CMU listing date, shared with 0.90 (csv-contract §7 equal-dates case); tarball mtimes up to 1993-02-11."},
+          "1.0": {"date": "1994-03-24", "precision": "day", "evidence": "CMU listing date; tarball mtimes 1994-03-18, days before the listing."},
+          "1.02": {"date": "1994", "precision": "year", "evidence": "D10 (Roberto 2026-06-06): year-only 1994. Real source-file mtimes top out 1994-12-01; AppleDouble/dir mtimes (2010/2017) are repackaging artifacts, not release dates."}
+        },
+        "ratified": true
+      }
+    }
+  ],
+  "provenance": [
+    {
+      "id": "P-author-identity",
+      "summary": "Author identity carried as a collective label in the CSV; per-person attribution in codemeta.json + this ledger entry.",
+      "provenance_transition": {"item": "author_identity", "from": null, "to": "observed"},
+      "details": {
+        "item": "author_identity",
+        "provenance": "observed",
+        "note": "CSV carries collective label 'Wild_LIFE authors' + noreply placeholder (csv-contract §5.1). Per-person attribution: Peter Van Roy, Richard Meyer, Jean-Claude Hervé (authors); Hassan Aït-Kaci, Seth Copen Goldstein, Abder Aggoun (contributors). Real third-party addresses are NOT published in the CSV (crit-M15); recorded here and in codemeta.json."
+      }
+    }
+  ]
+}
