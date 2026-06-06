@@ -1,0 +1,34 @@
+{
+  "description": "Synthetic, license-clean legacy-workbench fixtures that reproduce the AX5 / T10 legacy-profile precision-audit defect SHAPES (not copies of the third-party repos). Each maps to a real published acquisition the live audit targeted; see README.md.",
+  "fixtures": [
+    {
+      "genuine_defects": [
+        "BP-5 (artificial top-level wrapper directory in the release tree)"
+      ],
+      "name": "unipisa-cmm",
+      "note": "Tolerated dialects were the FALSE CSV-1/CM-1 before FIX-1/FIX-2; the wrapper directory is a genuine BP-5 the legacy profile must still surface (FAIL severity, enforced:false).",
+      "real_repo": "Unipisa/CMM-Workbench",
+      "stands_for": "wrapper-directory defect case",
+      "tolerated_dialects": [
+        "CSV-1 (unipisa legacy CSV dialect)",
+        "CM-1 (codemeta.json at repo root, not metadata/)"
+      ],
+      "tree_sha": "81c0f3c0d9a953a03911ae77dc19ce2985e4fb52"
+    },
+    {
+      "genuine_defects": [
+        "CM-2 (root codemeta.json with an @context SWH does not accept)"
+      ],
+      "name": "guide-chainage",
+      "note": "The guide dialect was a FALSE CSV-1 before FIX-1; the bogus @context is a genuine CM-2 the legacy profile must still surface — proving the tolerance is dialect-scoped, not a blanket suppression.",
+      "real_repo": "mathfichen/chainage_de_contour",
+      "stands_for": "non-canonical-CSV-dialect case",
+      "tolerated_dialects": [
+        "CSV-1 (guide `date original` legacy CSV dialect)"
+      ],
+      "tree_sha": "f0d96d1ff008622d50e29ea5571b7e0d4d23ebd7"
+    }
+  ],
+  "schema": "swhap-legacy-audit-corpus/1",
+  "tree_sha_algo": "git-sha1-tree (date-independent)"
+}

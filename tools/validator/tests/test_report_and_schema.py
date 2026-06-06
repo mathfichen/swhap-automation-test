@@ -65,6 +65,28 @@ def test_bsafe_encoding():
     assert R.bsafe("café".encode("utf-8")) == "café"  # valid utf-8 stays real
 
 
+def test_message_plain_never_empty_falls_back(validate_report):
+    """GAP-2: the serializer guarantees a non-empty message_plain (schema
+    minLength 1). An empty message falls back to message_technical, then to a
+    synthesized check_id/severity line — a finding is never message-less."""
+    # empty plain, has technical -> technical is used
+    f1 = R.Finding("BP-5", R.FAIL, {"tag": "1.0"}, ["tag"], "",
+                   message_technical="wrapper not stripped")
+    assert f1.to_dict()["message_plain"] == "wrapper not stripped"
+    # empty plain AND empty technical -> synthesized, non-empty, names the check
+    f2 = R.Finding("CSV-7", R.WARN, {"rows": [1, 2]}, ["rows"], "   ")
+    mp = f2.to_dict()["message_plain"]
+    assert mp.strip() and "CSV-7" in mp and "WARN" in mp
+    # a normal finding is untouched
+    f3 = R.Finding("CM-4", R.INFO, {"term": "funder"}, ["term"], "real text")
+    assert f3.to_dict()["message_plain"] == "real text"
+    # all three still validate against the frozen schema
+    rep = R.Report("legacy", "build", meta_stable=True)
+    for f in (f1, f2, f3):
+        rep.add(f)
+    validate_report(rep)
+
+
 def test_legacy_profile_enforced_false_exit_zero(wildlife):
     """Legacy audit: findings keep true severities but enforced:false, so the
     exit code is 0 (the run succeeded; findings are the output)."""
