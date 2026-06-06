@@ -2,6 +2,25 @@
 
 Milestone tracking against `swhap-automation/analysis/implementation-plan.md`.
 
+## M1 — COMPLETE (2026-06-06)
+
+The whole first milestone is closed with no open gaps. From a **clean clone**:
+**331 tests pass, 0 skipped**, no scratch-dir or network dependency.
+
+- **M1c (branch-layout decision + full regeneration)**: Wild_LIFE rebuilt under
+  both layouts; Roberto ruled **Model P** (decision D1, 4–0 on the evidence) and
+  **append→ rebuild-and-replace** iteration policy (decision D3, revised — see
+  below). The corrected Model-P workbench is reproducible from committed inputs
+  (`pilot/wildlife/regen/regen.py`) and validates green; the corrupted published
+  exemplar is formally banned (`pilot/wildlife/rag-corpus/BANNED.md`).
+- **Backward-compatibility audit** (reading old-format workbenches without false
+  alarms): two false-failure bugs fixed; now CI-reproducible from synthetic
+  license-clean fixtures (`fixtures/legacy/`, `test_legacy_audit_e2e.py`) — both
+  zero-false-failure and genuine-defect detection asserted.
+- **D3 revised** to *rebuild-and-replace* (supersession with a permanent SWH
+  pointer, not invalidation) per Roberto's correction; specs amended, enforcement
+  lands with the M2 publish step.
+
 ## M1b — DONE (2026-06-06)
 
 The pipeline can now *rebuild* curated history, not just check it. In `main`;
@@ -52,25 +71,19 @@ assert side = tarball-derived manifests (independent provenance, non-circular).
   the DEC license outreach for Wild_LIFE republication; rotate the
   `stories.k2.services` key printed in `SWHAP@Paris.md`.
 
-## Next — M1c (needs Roberto's input)
+## Next — M2 (non-expert intake + publish)
 
-M1c is the **first milestone's exit gate**: regenerate the corrected Wild_LIFE
-workbench end-to-end with the new tooling, and decide the branch layout on the
-evidence. It needs two rulings from Roberto (see `../swhap-automation/YOUR-ACTION-ITEMS.pdf`):
+The second milestone: the forge-issue intake surface for non-expert holders
+(decision D5), the curator workflow + legal go/no-go gate, the usability test
+(criterion C5), and the **publish step** — which is where the revised D3
+rebuild-and-replace flow (archive prior snapshot to SWH → record its SWHID as
+lineage → replace SourceCode) and the retargeted divergence check (DV-1) get
+implemented.
 
-- **Branch-layout decision (D1):** the regeneration is built under BOTH layouts
-  (purity model P / source-on-default-branch model G); a 7-point evidence memo
-  is prepared, Roberto rules, the loser is demoted to a read-only legacy profile.
-  Pre-declared tie-breaker: model P.
-- **The 1.02 release date (question Q9):** archive evidence supports year-only
-  1994; Roberto confirms or supplies a precise date.
-
-Engineering still buildable before those rulings: wire `build` into the
-extraction front-end (consume real extracted trees, `.emptydir` preservation
-end-to-end) and add the remaining validator checks the regeneration will need
-(RB-1 rebuild-reproducibility check at the entrypoint, JC journal coverage,
-the legacy-audit profile run against the two pinned acquisitions once Roberto
-fixes the target set).
+Needs Roberto's offline-brief items (`../swhap-automation/YOUR-ACTION-ITEMS.pdf`):
+the ≥2 usability testers (C5), the operator/namespace decision (D6 — where the
+toolkit and acquisitions live), and the DEC licence outreach (gates Wild_LIFE
+re-publication only).
 
 ## Known minor debt
 
