@@ -398,6 +398,31 @@ Published ledger lines are immutable (§5.3). Mistaken entries are corrected by
 current; the error remains visible in the record. The ledger itself is **never**
 subject to `rewrite-event` — that action governs git refs only.
 
+> **AMENDMENT 2026-06-06 — D3 revised to rebuild-and-replace (see
+> `analysis/decisions.md` D3-RESOLVED).** Roberto ruled that rebuild-and-replace
+> is a **first-class, expected** operation, not a destructive exception: SWHIDs
+> are permanent once archived in Software Heritage, so replacing the SourceCode
+> branch with a freshly-rebuilt history **supersedes** the prior snapshot rather
+> than "invalidating" it. The decisive case is **chronological insertion** (a
+> release surfacing later that belongs *between* existing ones), which strict
+> append-only cannot represent correctly. Consequences for this section, landing
+> with the **M2 publish step** (the publish flow does not exist yet, so this is
+> recorded intent, not yet schema-enforced):
+> 1. The two-phase protocol below is **kept as the ceremony** for replacing a
+>    published source ref, but reframed: the curator acknowledges a
+>    *supersession*, not an *invalidation*.
+> 2. `details` of the sign-off gains a `supersedes_snapshot_swhid` field
+>    recording the **SWH snapshot SWHID** of the archived prior history (the
+>    durable lineage pointer), and the prior history MUST be archived in SWH
+>    **before** replacement. `acknowledgement` becomes
+>    `"prior-snapshot-archived-in-swh"`; `invalidated_swhids` is retired in favour
+>    of this pointer (the prior SWHIDs are *preserved*, not invalidated).
+> 3. `DV-1` retargets from "refuse any divergence" to "refuse *un-journaled,
+>    un-archived* divergence" — it blocks an accidental clobber, never a recorded
+>    SWH-backed supersession.
+> The text below is the superseded interim wording, retained until the M2 step
+> implements the above.
+
 ### 8.2 `rewrite-event` — D3 interim escape hatch for published refs
 
 D3 interim default: published refs are append-only; `swhap publish` promotes
