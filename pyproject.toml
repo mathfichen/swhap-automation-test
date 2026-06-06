@@ -16,4 +16,5 @@ testpaths = [
     "fixtures/tests",
     "swhap-core/tests",
     "tools/validator/tests",
+    "pilot/wildlife/regen",
 ]

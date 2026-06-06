@@ -1,0 +1,52 @@
+{
+  "schema": "swhap-rag-corpus/1",
+  "title": "Wild_LIFE corrected RAG / few-shot corpus",
+  "purpose": "Pins the CORRECTED Wild_LIFE sources that the AI assistant layer (brief Layer 2) may use as retrieval context and few-shot exemplars. The corrupted PUBLISHED exemplar is formally barred — see BANNED.md. This manifest is the allow-list; BANNED.md is the deny-list.",
+  "pinned": "2026-06-06",
+  "ratified_by": "Roberto Di Cosmo (curator)",
+  "approved_sources": [
+    {
+      "id": "regen-workbench",
+      "kind": "regenerated-workbench",
+      "ref": "swhap-toolkit/pilot/wildlife/regen/",
+      "produced_by": "pilot/wildlife/regen/regen.py (Model P, deterministic, validated strict-P green)",
+      "what": "The canonical Model-P Wild_LIFE workbench: validated tree-faithful source on the orphan SourceCode branch (one commit + one annotated tag per release), canonical metadata. Reproducible from committed inputs.",
+      "use_as": ["structure exemplar", "branch-layout exemplar", "journal exemplar"]
+    },
+    {
+      "id": "version-history-csv",
+      "kind": "metadata",
+      "ref": "swhap-toolkit/pilot/wildlife/regen/version_history.csv",
+      "what": "The canonical 4-release version_history.csv (vhcsv-written, exact §8 header). The authoritative curated history.",
+      "use_as": ["CSV few-shot exemplar"]
+    },
+    {
+      "id": "codemeta-canonical",
+      "kind": "metadata",
+      "ref": "swhap-toolkit/pilot/wildlife/regen/codemeta.json",
+      "what": "Canonical CodeMeta 2.0. @context = https://doi.org/10.5063/schema/codemeta-2.0 (the swh-indexer-accepted context, D9). Uses funder (not funding); no ad-hoc fields.",
+      "canonical_context": "https://doi.org/10.5063/schema/codemeta-2.0",
+      "use_as": ["codemeta few-shot exemplar"]
+    },
+    {
+      "id": "curation-manifest",
+      "kind": "decision-record",
+      "ref": "swhap-toolkit/pilot/wildlife/regen/curation-manifest.json",
+      "what": "The six curator-approved curatorial decisions (AppleDouble exclusion, absolute/relative symlink preservation, perm documentation, curator-email opt-in, inferred dates). Provenance-tagged, ratified per decisions.md §1.02-RATIFY.",
+      "use_as": ["curatorial-decision exemplar", "provenance exemplar"]
+    },
+    {
+      "id": "tf-oracles",
+      "kind": "validation-oracle",
+      "ref": "swhap-toolkit/fixtures/wildlife/manifests/{0.90,0.91,1.0}.json + swhap-toolkit/pilot/wildlife/regen/manifests/1.02.json",
+      "what": "Tree-fidelity oracles: 0.90/0.91/1.0 are the frozen tarball-derived fixtures (independent provenance); 1.02 is the derived curated Model-P tag-tree oracle. NOTE: fixtures/wildlife/manifests/1.02.json is the QUARANTINED census (forensic record), not a few-shot exemplar.",
+      "use_as": ["tree-fidelity reference"]
+    }
+  ],
+  "arbitration_notes": ["branch-model-arbitration.md"],
+  "deny_list": "BANNED.md",
+  "canonical_codemeta_context": {
+    "accepted": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "policy": "D9 — the validator's accepted-context set is vendored from swh-indexer source, never a hardcoded constant. A 4.0 context is NOT yet accepted and would be silently dropped (C2 hazard)."
+  }
+}

@@ -1,0 +1,1881 @@
+{
+ "schema": "swhap-tree-manifest/1",
+ "release": "1.02",
+ "tarball": "Life1.02Ultrix.tar",
+ "tarball_sha256": "0e43f8296db6ba490d551d8ae4fc56eb684231b0a143e26c705076f21f543763",
+ "wrapper": "Life1.02Ultrix/",
+ "quarantined": false,
+ "counts": {
+  "files": 183,
+  "symlinks": 69,
+  "empty_dirs": 0,
+  "entries": 252
+ },
+ "empty_dirs": [],
+ "symlinks": [
+  {
+   "path": "ANSI/LIFESUN/.set_up",
+   "target": "../WILDLIFE/.set_up"
+  },
+  {
+   "path": "ANSI/LIFESUN/.set_up_basis",
+   "target": "../WILDLIFE/.set_up_basis"
+  },
+  {
+   "path": "ANSI/LIFESUN/Examples",
+   "target": "../WILDLIFE/Examples"
+  },
+  {
+   "path": "ANSI/LIFESUN/Lib",
+   "target": "../WILDLIFE/Lib"
+  },
+  {
+   "path": "ANSI/LIFESUN/Lib.c",
+   "target": "../WILDLIFE/Lib.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/Life.c",
+   "target": "../WILDLIFE/Life.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/Makefile.bak",
+   "target": "../WILDLIFE/Makefile.bak"
+  },
+  {
+   "path": "ANSI/LIFESUN/Makefile.orig",
+   "target": "../WILDLIFE/Makefile.orig"
+  },
+  {
+   "path": "ANSI/LIFESUN/README",
+   "target": "../WILDLIFE/README"
+  },
+  {
+   "path": "ANSI/LIFESUN/TAGS",
+   "target": "../WILDLIFE/TAGS"
+  },
+  {
+   "path": "ANSI/LIFESUN/Tools",
+   "target": "../WILDLIFE/Tools"
+  },
+  {
+   "path": "ANSI/LIFESUN/arity.c",
+   "target": "../WILDLIFE/arity.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/bi_math.c",
+   "target": "../WILDLIFE/bi_math.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/bi_sys.c",
+   "target": "../WILDLIFE/bi_sys.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/bi_type.c",
+   "target": "../WILDLIFE/bi_type.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/built_ins.c",
+   "target": "../WILDLIFE/built_ins.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/built_ins.h",
+   "target": "../WILDLIFE/built_ins.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/built_ins.lf",
+   "target": "../WILDLIFE/built_ins.lf"
+  },
+  {
+   "path": "ANSI/LIFESUN/c_life.h",
+   "target": "../WILDLIFE/c_life.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/copy.c",
+   "target": "../WILDLIFE/copy.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/copy.h",
+   "target": "../WILDLIFE/copy.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/error.c",
+   "target": "../WILDLIFE/error.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/error.h",
+   "target": "../WILDLIFE/error.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/extern.h",
+   "target": "../WILDLIFE/extern.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/hash_table.c",
+   "target": "../WILDLIFE/hash_table.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/info.c",
+   "target": "../WILDLIFE/info.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/info.h",
+   "target": "../WILDLIFE/info.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/interrupt.c",
+   "target": "../WILDLIFE/interrupt.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/interrupt.h",
+   "target": "../WILDLIFE/interrupt.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/lefun.c",
+   "target": "../WILDLIFE/lefun.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/lefun.h",
+   "target": "../WILDLIFE/lefun.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/lib.h",
+   "target": "../WILDLIFE/lib.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/life_icon",
+   "target": "../WILDLIFE/life_icon"
+  },
+  {
+   "path": "ANSI/LIFESUN/list.c",
+   "target": "../WILDLIFE/list.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/list.h",
+   "target": "../WILDLIFE/list.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/login.c",
+   "target": "../WILDLIFE/login.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/login.h",
+   "target": "../WILDLIFE/login.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/lub.c",
+   "target": "../WILDLIFE/lub.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/memory.c",
+   "target": "../WILDLIFE/memory.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/memory.h",
+   "target": "../WILDLIFE/memory.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/modules.c",
+   "target": "../WILDLIFE/modules.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/modules.h",
+   "target": "../WILDLIFE/modules.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/onlinedoc.lf",
+   "target": "../WILDLIFE/onlinedoc.lf"
+  },
+  {
+   "path": "ANSI/LIFESUN/parser.c",
+   "target": "../WILDLIFE/parser.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/parser.h",
+   "target": "../WILDLIFE/parser.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/print.c",
+   "target": "../WILDLIFE/print.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/print.h",
+   "target": "../WILDLIFE/print.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/raw.c",
+   "target": "../WILDLIFE/raw.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/raw.h",
+   "target": "../WILDLIFE/raw.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/templates.c",
+   "target": "../WILDLIFE/templates.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/templates.h",
+   "target": "../WILDLIFE/templates.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/term_expansion.lf",
+   "target": "../WILDLIFE/term_expansion.lf"
+  },
+  {
+   "path": "ANSI/LIFESUN/token.c",
+   "target": "../WILDLIFE/token.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/token.h",
+   "target": "../WILDLIFE/token.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/trees.c",
+   "target": "../WILDLIFE/trees.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/trees.h",
+   "target": "../WILDLIFE/trees.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/types.c",
+   "target": "../WILDLIFE/types.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/types.h",
+   "target": "../WILDLIFE/types.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/xdisplaylist.c",
+   "target": "../WILDLIFE/xdisplaylist.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/xdisplaylist.h",
+   "target": "../WILDLIFE/xdisplaylist.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/xpred.c",
+   "target": "../WILDLIFE/xpred.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/xpred.h",
+   "target": "../WILDLIFE/xpred.h"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Examples",
+   "target": "../../Examples"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Lib",
+   "target": "../../Lib"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Tools",
+   "target": "../../Tools"
+  },
+  {
+   "path": "Examples",
+   "target": "/home/ps-home/vanroy/Life1.01/Examples"
+  },
+  {
+   "path": "Lib",
+   "target": "/home/ps-home/vanroy/Life1.01/Lib"
+  },
+  {
+   "path": "RCS",
+   "target": "/udir/rmeyer/LIFE/MODULE/RCS"
+  },
+  {
+   "path": "Tests",
+   "target": "/home/ps-home/vanroy/Life1.01/Tests"
+  }
+ ],
+ "entries": [
+  {
+   "path": ".set_up",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6091496236ae35ed1cc661642f02060386b5e8cd"
+  },
+  {
+   "path": ".set_up_basis",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6d998299cc142109ef30f12460dfb0a7e6d5bc7e"
+  },
+  {
+   "path": "ANSI/LIFESUN/.set_up",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "6e33aba448445514ab7a873289568a7bc56d26b6",
+   "target": "../WILDLIFE/.set_up"
+  },
+  {
+   "path": "ANSI/LIFESUN/.set_up_basis",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "22083adca7cd3ab6810de75933925174ade69e95",
+   "target": "../WILDLIFE/.set_up_basis"
+  },
+  {
+   "path": "ANSI/LIFESUN/Examples",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "62b2dd86631e692d0731ca78f778d71bce47b07c",
+   "target": "../WILDLIFE/Examples"
+  },
+  {
+   "path": "ANSI/LIFESUN/Lib",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "f5da9db352ed6b2d0665f7f4b1d19aba0a20802d",
+   "target": "../WILDLIFE/Lib"
+  },
+  {
+   "path": "ANSI/LIFESUN/Lib.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "63de7a7cb56a2a4d888afecdc5c0a818570c40b0",
+   "target": "../WILDLIFE/Lib.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/Life.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "254cd567f28795d704cd1b5e67f7b2162c03817f",
+   "target": "../WILDLIFE/Life.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/Makefile",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6853e7ce47e82799ae4bc1529544ebfba5b17ed4"
+  },
+  {
+   "path": "ANSI/LIFESUN/Makefile.bak",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "c2a2a44cc7c3060d866250b7e50d1791fc48ea8f",
+   "target": "../WILDLIFE/Makefile.bak"
+  },
+  {
+   "path": "ANSI/LIFESUN/Makefile.orig",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "4049a5fddd333048c6084e416c97b7b68633fffc",
+   "target": "../WILDLIFE/Makefile.orig"
+  },
+  {
+   "path": "ANSI/LIFESUN/README",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "f6bd79f57d58d2dec868156128e0eea9a3cb8f65",
+   "target": "../WILDLIFE/README"
+  },
+  {
+   "path": "ANSI/LIFESUN/TAGS",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "7d461b4d07a4f22f62dac2bac1eb6fce193c9e8d",
+   "target": "../WILDLIFE/TAGS"
+  },
+  {
+   "path": "ANSI/LIFESUN/Tools",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "1b9fc7406f6b9b02c1cf6ad1f9aabec89bf247ca",
+   "target": "../WILDLIFE/Tools"
+  },
+  {
+   "path": "ANSI/LIFESUN/arity.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "cea3e32f73ac0acc7f77fb5318bfe32c54c3c4ed",
+   "target": "../WILDLIFE/arity.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/bi_math.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "d0c6636cde04471149d71eb931d719073e256fca",
+   "target": "../WILDLIFE/bi_math.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/bi_sys.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "7ce4a4ec145444f59983d74ff58c35e6fae6df68",
+   "target": "../WILDLIFE/bi_sys.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/bi_type.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "0595149819b8363c54221b39a348bee47b378c95",
+   "target": "../WILDLIFE/bi_type.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/built_ins.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "c4c8e73975a7ddfc5ed768cf741b3835b724254a",
+   "target": "../WILDLIFE/built_ins.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/built_ins.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "b7c7e78bfdea3a5690da18e6eeadeb04fc7ded79",
+   "target": "../WILDLIFE/built_ins.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/built_ins.lf",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "2f6c9e386c921cb62667501df36e245c53279dd1",
+   "target": "../WILDLIFE/built_ins.lf"
+  },
+  {
+   "path": "ANSI/LIFESUN/c_life.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "d89d01a93495d4e73a513fdcf0501fd7b54bac48",
+   "target": "../WILDLIFE/c_life.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/copy.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "929754170dcf876d51963e61e58ec06d8b78e8f4",
+   "target": "../WILDLIFE/copy.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/copy.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "cd5531c3055cb933aabff9f206ee093f347a7bda",
+   "target": "../WILDLIFE/copy.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/error.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "50cf5fa9c2e82b05a82033d71ce49790713a2976",
+   "target": "../WILDLIFE/error.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/error.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "f14a3f3c4e19b75f60960429a37ed9f0d91438ed",
+   "target": "../WILDLIFE/error.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/extern.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "8c41bcc0055a12229e7362de74e11e8a81857cee",
+   "target": "../WILDLIFE/extern.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/hash_table.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "da7b3b87ed53cc8c0597d049438ec41d91b80375",
+   "target": "../WILDLIFE/hash_table.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/info.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "42635117218d2e4c630673194193ed7619f8e3a6",
+   "target": "../WILDLIFE/info.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/info.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "d0b0040d60933653241014c3c1e1a1d1740d3c03",
+   "target": "../WILDLIFE/info.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/interrupt.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "f7494d337dad05930594dcbda5f1b2798c5a312e",
+   "target": "../WILDLIFE/interrupt.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/interrupt.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "65ba60b891cc36c8a51ddef75c37a483e6575231",
+   "target": "../WILDLIFE/interrupt.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/lefun.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "c2483a40d2006ef1fbe62354e35832e64b0b882f",
+   "target": "../WILDLIFE/lefun.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/lefun.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "6081c43394e0a43278d8e4cd6a846911d5bd3f3a",
+   "target": "../WILDLIFE/lefun.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/lib.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "21a99f6df7df4912448c4e840d2244ed731744d2",
+   "target": "../WILDLIFE/lib.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/life_icon",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "ea11493ba07a3c3617a0ec81ac4736a612af39ee",
+   "target": "../WILDLIFE/life_icon"
+  },
+  {
+   "path": "ANSI/LIFESUN/list.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "c952efdf4ca4623b31e622864f0985c20a1090ea",
+   "target": "../WILDLIFE/list.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/list.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "2c40a26c634bdcd731ceffb331e15e5f0b7fbe90",
+   "target": "../WILDLIFE/list.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/login.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "eaf6c2107fa39d9a1d137b9053595eaa03a0d2ec",
+   "target": "../WILDLIFE/login.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/login.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "2a535e312e60b8c1b0754687ef7d37a38a8e9c1b",
+   "target": "../WILDLIFE/login.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/lub.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "96b2d73e08c1a3f343271d0e0967812b6a2cc069",
+   "target": "../WILDLIFE/lub.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/memory.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "ec9547652a2b3b9bb58f0a28912ca5d689fada45",
+   "target": "../WILDLIFE/memory.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/memory.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "810c5ae372afac9581782c4ac2ac2e2525bf2ca8",
+   "target": "../WILDLIFE/memory.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/modules.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "46758ec99f766fe94f6b61faf5d0404ed9a0b098",
+   "target": "../WILDLIFE/modules.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/modules.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "099232e21de2c5027970002694d197fc5faf1f9f",
+   "target": "../WILDLIFE/modules.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/onlinedoc.lf",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "8610ff38cbc13c9774791a58bf57f5317bf638dc",
+   "target": "../WILDLIFE/onlinedoc.lf"
+  },
+  {
+   "path": "ANSI/LIFESUN/parser.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "fdc237501029580d84fa1bbf8e33558023bdec0b",
+   "target": "../WILDLIFE/parser.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/parser.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "94d6e288121cbc0762695a0855357fadfb89837d",
+   "target": "../WILDLIFE/parser.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/print.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "d623cb3484754b607ae6b6b38247a4a784b2114d",
+   "target": "../WILDLIFE/print.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/print.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "603822fc50ecd43fca1531dc5ebf6f8767a4a472",
+   "target": "../WILDLIFE/print.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/raw.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "d2285804ae44ad9d47324f41866eb0ae06149a66",
+   "target": "../WILDLIFE/raw.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/raw.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "d4380c633e58c16284e3daa1517916eb89a1b964",
+   "target": "../WILDLIFE/raw.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/templates.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "627b2c9ab79cf9fa5c5192f54b86a8dda325a332",
+   "target": "../WILDLIFE/templates.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/templates.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "6d85c334b6cc74158cb24dd0a4153d6a3115ac6a",
+   "target": "../WILDLIFE/templates.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/term_expansion.lf",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "873baba38a92d530bb2c16c133c437b0e71298e0",
+   "target": "../WILDLIFE/term_expansion.lf"
+  },
+  {
+   "path": "ANSI/LIFESUN/token.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "bed8fd774b0a1dfc9d03636ff597bedbefb47404",
+   "target": "../WILDLIFE/token.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/token.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "d3142c69cb3e6c3e3cf722c7c779235c0e2fc3ba",
+   "target": "../WILDLIFE/token.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/trees.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "ffc76219e4167de174ca65a719e50fdf7ce76596",
+   "target": "../WILDLIFE/trees.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/trees.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "263f936cd419b14274590764f05fbde6ec0706bb",
+   "target": "../WILDLIFE/trees.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/types.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "ee24f42c4caaaab257843b0dbf731fd502f38b68",
+   "target": "../WILDLIFE/types.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/types.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "032fb25caf4915cfda280c1c94604a6fab8b8d88",
+   "target": "../WILDLIFE/types.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/xdisplaylist.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "eb16129c7643441ad35fe49970464626c8140ec6",
+   "target": "../WILDLIFE/xdisplaylist.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/xdisplaylist.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "98da7ce724f5eb9593c86f4ff6ad72da0b4969e2",
+   "target": "../WILDLIFE/xdisplaylist.h"
+  },
+  {
+   "path": "ANSI/LIFESUN/xpred.c",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "be025085ab5e478e3d4a9937c67fbcfa4c027460",
+   "target": "../WILDLIFE/xpred.c"
+  },
+  {
+   "path": "ANSI/LIFESUN/xpred.h",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "97e387c6d016ad4cc8b6970aef587734879afaf4",
+   "target": "../WILDLIFE/xpred.h"
+  },
+  {
+   "path": "ANSI/WILDLIFE/.set_up",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c2420fdcdd97d2bb46b0c8b688a0e6ac38d66b81"
+  },
+  {
+   "path": "ANSI/WILDLIFE/.set_up_basis",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "82d15f0000461f6e67bc15806618679bb956d4f4"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Examples",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "ced590fd8b0d4b75ff22c8adcce5852ead3d0bd3",
+   "target": "../../Examples"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Lib",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "1df6e950963b13ece2726cb3e6fbae1f97ad4da7",
+   "target": "../../Lib"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Lib.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "17d4f55d4327ba40a2dafaf63ba149a5aa493032"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Life.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "118a7c4c2c6d4622d6c5c6b2768fb816a1f1d764"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Makefile",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "938ccb2e3916edfed22154c3039cb86c0f6d799d"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Makefile.apr20",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "dd9c63575659552c4a9c44e80fae2c4672aed818"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Makefile.bak",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "dd9c63575659552c4a9c44e80fae2c4672aed818"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Makefile.orig",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "234c9bc180d984f58784c7e0f1162e1621eec17c"
+  },
+  {
+   "path": "ANSI/WILDLIFE/README",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "629fdd471e1568983d9935e2281e415b34822abf"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Source.tar.Z",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c79dd05720547e2aefc07493b28b52a7a4f55db3"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Source.tar.Z.uuen",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "9f3dc385d88fbf15f5e9aee0bd81233647eec299"
+  },
+  {
+   "path": "ANSI/WILDLIFE/TAGS",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6296ffd7a513a8eac568cebf97c8c1186c05f9a7"
+  },
+  {
+   "path": "ANSI/WILDLIFE/Tools",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "08fba9884ae9512cfce64853a0e10877e86ad796",
+   "target": "../../Tools"
+  },
+  {
+   "path": "ANSI/WILDLIFE/arity.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c383c1fa76672b52c0e4f60fba4e9902365a36fa"
+  },
+  {
+   "path": "ANSI/WILDLIFE/bi_math.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "f4d37a9404bf09eadf106e14f222f76074687acc"
+  },
+  {
+   "path": "ANSI/WILDLIFE/bi_sys.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "20fb2dc15a68208ae644606f47ccf7f3e6a5cb67"
+  },
+  {
+   "path": "ANSI/WILDLIFE/bi_type.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "75d5fa5e8a91d4b8324bb8ced36accd279845265"
+  },
+  {
+   "path": "ANSI/WILDLIFE/built_ins.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "f2dfd8114979c10d729a50a59dc4aa3b32293098"
+  },
+  {
+   "path": "ANSI/WILDLIFE/built_ins.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "d9356ceffb187cd308984b895a7c4fbb4d295fe8"
+  },
+  {
+   "path": "ANSI/WILDLIFE/built_ins.lf",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "e3dab6beaedc66b8d79c9edcc0b2de5d67e72b45"
+  },
+  {
+   "path": "ANSI/WILDLIFE/c_life.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "423f5945fb0709bed153a8a7d824aef6b074462f"
+  },
+  {
+   "path": "ANSI/WILDLIFE/copy.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "5c4deb3dbb112b61c5cf44c69ddfdba1ee4ee901"
+  },
+  {
+   "path": "ANSI/WILDLIFE/copy.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "44b4a5c57f7cf202a9fe7996616974c8224c0a82"
+  },
+  {
+   "path": "ANSI/WILDLIFE/error.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "7d8ca641cf0ee9b4e835c40f7b44010276c1d6f7"
+  },
+  {
+   "path": "ANSI/WILDLIFE/error.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "846122e5b5ed1b780330a2d94e9957f8ae99cde8"
+  },
+  {
+   "path": "ANSI/WILDLIFE/extern.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "d30b77db0c7aa05b4f741d80d9c84d1c57f11bb1"
+  },
+  {
+   "path": "ANSI/WILDLIFE/hash_table.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "16038d43fe06ff87919b09d6612968c86752f8b7"
+  },
+  {
+   "path": "ANSI/WILDLIFE/info.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "d226a4ed24e75700930572b6ff95a5de8e45f54f"
+  },
+  {
+   "path": "ANSI/WILDLIFE/info.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "860c856a093421ebfec1f058a254f51d8887f612"
+  },
+  {
+   "path": "ANSI/WILDLIFE/info.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "76be320a0866f070ad5bf3bffe1eadce62a40458"
+  },
+  {
+   "path": "ANSI/WILDLIFE/interrupt.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "2217aedad9e8951eb1558c49588ede61469a35b8"
+  },
+  {
+   "path": "ANSI/WILDLIFE/interrupt.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "3fb7da76ee3854e9d9aad35484e5afd17d3bb450"
+  },
+  {
+   "path": "ANSI/WILDLIFE/lefun.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c0fa544febc1f2ec3323ee962025d69b2354c56b"
+  },
+  {
+   "path": "ANSI/WILDLIFE/lefun.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "04eb1c64c9ba43d19e43a8599a1a6daa7656aa80"
+  },
+  {
+   "path": "ANSI/WILDLIFE/lib.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "3772a8636c3c37fb6da8e097c7728d03762ede9f"
+  },
+  {
+   "path": "ANSI/WILDLIFE/life_icon",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c80a612e67565315bb9dba70cd4c70818b562cf2"
+  },
+  {
+   "path": "ANSI/WILDLIFE/list.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "aef1251a05a29bae53ab79e2ef6ebda8ecedc220"
+  },
+  {
+   "path": "ANSI/WILDLIFE/list.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "057f872525e765e8e981f4e02071b407fb3f4ca5"
+  },
+  {
+   "path": "ANSI/WILDLIFE/login.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "0df735c65b797887c571feafd4585b58baeaac09"
+  },
+  {
+   "path": "ANSI/WILDLIFE/login.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "4209e0863347d6c3a2f8662c07e450601e2805a0"
+  },
+  {
+   "path": "ANSI/WILDLIFE/lub.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "de21ddc78e0c729b5a23b02043982e26b87a04f8"
+  },
+  {
+   "path": "ANSI/WILDLIFE/main.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+  },
+  {
+   "path": "ANSI/WILDLIFE/memory.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "824a7abcec212fb65a1c4c1c2602daac3659b00d"
+  },
+  {
+   "path": "ANSI/WILDLIFE/memory.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1c3d456e7f814f09a063e3dc5dbe3c83f67997ed"
+  },
+  {
+   "path": "ANSI/WILDLIFE/modules.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1c8377498f85b42d14fe43a905757cec5959bd7e"
+  },
+  {
+   "path": "ANSI/WILDLIFE/modules.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "514b66a2f8bced1d2ea1b6af0fa7225b8f28fd47"
+  },
+  {
+   "path": "ANSI/WILDLIFE/onlinedoc.lf",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "aea7f07d1732702c2aee77639043001669042fc8"
+  },
+  {
+   "path": "ANSI/WILDLIFE/parser.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "e98b0b8486ec16547269d7ee4b34d8f32e0b6f3e"
+  },
+  {
+   "path": "ANSI/WILDLIFE/parser.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "737639a6d442eef67e1743c6c4abbe190a6df164"
+  },
+  {
+   "path": "ANSI/WILDLIFE/parser.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c1fd92dcb87442903002d51765386dccd05450c1"
+  },
+  {
+   "path": "ANSI/WILDLIFE/print.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "8be954d3d856bdbb1f89cb0fe6dd1e62c975fcd2"
+  },
+  {
+   "path": "ANSI/WILDLIFE/print.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "17d02558df4aa5c377a45d655e6f80859f6ec878"
+  },
+  {
+   "path": "ANSI/WILDLIFE/print.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "0941b1601f152e515ea684fcbc79175882c9571c"
+  },
+  {
+   "path": "ANSI/WILDLIFE/raw.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "0f2abc9186a9e4b7060610f8c48d8263b191d820"
+  },
+  {
+   "path": "ANSI/WILDLIFE/raw.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "eb0bf2a0633e25a7eabbe53d49a43036036cad96"
+  },
+  {
+   "path": "ANSI/WILDLIFE/templates.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c83c967d17ab0f46c66df0579392914559434bad"
+  },
+  {
+   "path": "ANSI/WILDLIFE/templates.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "a0e6378457ad4e8d779f1e39c9c2f52efec86db9"
+  },
+  {
+   "path": "ANSI/WILDLIFE/term_expansion.lf",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "2f7d5b37196a579d0989e579841623b5d5523a88"
+  },
+  {
+   "path": "ANSI/WILDLIFE/token.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "0a15b3814444020e7fc37d2b7f0fda60c130cdcd"
+  },
+  {
+   "path": "ANSI/WILDLIFE/token.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "216eafd181b3f12fc103962dfb35645cfda536f5"
+  },
+  {
+   "path": "ANSI/WILDLIFE/token.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "ba495af096da49c29f45d8baf12109b7cb31ff44"
+  },
+  {
+   "path": "ANSI/WILDLIFE/trees.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "ce9ae566c7f0602a2b8ae6756ef1da6cdebd8b48"
+  },
+  {
+   "path": "ANSI/WILDLIFE/trees.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "71a329a3ffa08cfb374dbed2d73236a15ea1e847"
+  },
+  {
+   "path": "ANSI/WILDLIFE/trees.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c970c1529c0417b1dbba003d234fa8ca70927d88"
+  },
+  {
+   "path": "ANSI/WILDLIFE/types.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "33ae3143410512fe35256dd602e0aa9858f34219"
+  },
+  {
+   "path": "ANSI/WILDLIFE/types.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "56794a859b7c78b316ea94ea60f85518ad7878de"
+  },
+  {
+   "path": "ANSI/WILDLIFE/wild_life",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "67c41caf1ddc8b2b396573fdd793a742a66b2fe8"
+  },
+  {
+   "path": "ANSI/WILDLIFE/xdisplaylist.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1485fa124e0ca30f4d2177098c8e2f5d8092efde"
+  },
+  {
+   "path": "ANSI/WILDLIFE/xdisplaylist.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c1aae350b4f3089b469e2ce5e4154f351be7df17"
+  },
+  {
+   "path": "ANSI/WILDLIFE/xpred.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "42a85c88621976f7ffa395c5c66369b64461c894"
+  },
+  {
+   "path": "ANSI/WILDLIFE/xpred.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "a43fefa6f3b82bc35c5cc561196f469fd112a332"
+  },
+  {
+   "path": "ANSI/make_life_dir",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "eba5cd31035171849cd86047eb5be812c685481f"
+  },
+  {
+   "path": "ANSI/s2.tar",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "93f5b3c7f84058b74dc8d986ba8d27a0580288a2"
+  },
+  {
+   "path": "Examples",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "db6b4dc9678f3191b5ef6fcc97e5a9a4f60dcec3",
+   "target": "/home/ps-home/vanroy/Life1.01/Examples"
+  },
+  {
+   "path": "Kent.Tong/13776",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "144a1dbe1aad7690c54440fd7774c65c704cc43c"
+  },
+  {
+   "path": "Kent.Tong/13777",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "23027f860513b57bfef1d60c358f47146a85a4ec"
+  },
+  {
+   "path": "Kent.Tong/Makefile",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "b5222b192f5c52a1e102540941c1d59c4c3bac2b"
+  },
+  {
+   "path": "Kent.Tong/charcode.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "8552ba55c60d11342bb2e5094d1baba5d96ea4f7"
+  },
+  {
+   "path": "Kent.Tong/children.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "9ecebcc9792d1093ae5d7051fa8780b260502b08"
+  },
+  {
+   "path": "Kent.Tong/files.tar",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "7e1b77a4af190af58f78c6f612db8ed55d1c2d0a"
+  },
+  {
+   "path": "Kent.Tong/libtest.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6f36508e3b3e55400af365b586b087d739bf1cd6"
+  },
+  {
+   "path": "Kent.Tong/matrix.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "f6cbefe518d2c400f92f1c1288d66b732081f34c"
+  },
+  {
+   "path": "Kent.Tong/parse.errdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "d0a01a401d5a243b077de2b030ed1d0d174ff578"
+  },
+  {
+   "path": "Kent.Tong/parser.errdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "7414629589174395c8d6964398878d05f9ca01ee"
+  },
+  {
+   "path": "Kent.Tong/parser.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c1e4ec08d59efd0502e5d149e425f861c012ed46"
+  },
+  {
+   "path": "Kent.Tong/t8104.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "b670c924ff6cbecdd5034adfec2b2bb750860fcf"
+  },
+  {
+   "path": "Kent.Tong/test03.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "fb2735b46e7e3fc2ac84f0b1bcb1890cdd9d8124"
+  },
+  {
+   "path": "Kent.Tong/xpred.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "9fb9b194511c46dcba562ee88b031dd6798fc5db"
+  },
+  {
+   "path": "Kent.Tong/z_gctoken1.errdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "292dfb3df05689d1113a8c58f413c8ed1b54a539"
+  },
+  {
+   "path": "Kent.Tong/z_gctoken1.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1f32ce4f89b663ebd51cddbd3a265302ba9e4c03"
+  },
+  {
+   "path": "Kent.Tong/z_gctoken2.errdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "292dfb3df05689d1113a8c58f413c8ed1b54a539"
+  },
+  {
+   "path": "Kent.Tong/z_gctoken2.refdiff",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "7e2cdad94e6f513801596fdac4aa342ca62c9acd"
+  },
+  {
+   "path": "LICENSE",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "18c4bcd3598eda91cc7d428e0261bf35aa8acbba"
+  },
+  {
+   "path": "Lib",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "5c136195ed1164635f8979fc7a9c4d9b4930e755",
+   "target": "/home/ps-home/vanroy/Life1.01/Lib"
+  },
+  {
+   "path": "Lib.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6d9b24d23ec9722ddfe6761dd21ff675a17a6ad6"
+  },
+  {
+   "path": "Life.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "fd391edd5f58ad777b0843b9b7ed7ad7a1015ffc"
+  },
+  {
+   "path": "Makefile",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "0f3cbf1093e226131119f4e76b39281e5dd5ea68"
+  },
+  {
+   "path": "Makefile.bak",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "0f3cbf1093e226131119f4e76b39281e5dd5ea68"
+  },
+  {
+   "path": "PORTABILITY",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1a2c256b2eb58e1da1e9fe5993cd8d757d574b27"
+  },
+  {
+   "path": "RCS",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "5130cb673faeddc891fe104483a60e25688dcf5f",
+   "target": "/udir/rmeyer/LIFE/MODULE/RCS"
+  },
+  {
+   "path": "README",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "cd4d332ab97767d8070e1fe9cf369d2353c2f9fb"
+  },
+  {
+   "path": "TO.DO.1.02",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "5ab6ba0c7518c5be6b2d31129ff85e1585fba967"
+  },
+  {
+   "path": "Tests",
+   "type": "symlink",
+   "mode": "120000",
+   "git_blob_sha1": "7070bfad5232e9e9c300d7b573dc2183da22ea38",
+   "target": "/home/ps-home/vanroy/Life1.01/Tests"
+  },
+  {
+   "path": "arity.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c383c1fa76672b52c0e4f60fba4e9902365a36fa"
+  },
+  {
+   "path": "arity.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c4171816649511d77c3d49445bfb1b6f67622cee"
+  },
+  {
+   "path": "bi_math.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "41c9a9d24cedfab50b9450b536b51d2fd4b2b350"
+  },
+  {
+   "path": "bi_math.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6b6de1c61c641615fd59dd3002aac60efe001e04"
+  },
+  {
+   "path": "bi_sys.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "fdea044af79169d125a01af85e0159e87c7a9793"
+  },
+  {
+   "path": "bi_sys.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "106fbc0d15108c82ce73a7db1bea1132069de5ce"
+  },
+  {
+   "path": "bi_type.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "eca43ef03ca5466dfdbcc588bac41678af44d7e1"
+  },
+  {
+   "path": "bi_type.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "09437dea99ff451ec140679175b2e6eaeec4a327"
+  },
+  {
+   "path": "built_ins.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "14ff711eec44d76537ffc51b0428ee5e996aaa04"
+  },
+  {
+   "path": "built_ins.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "03e3eeacc4ed9024e696ec249e32166817dc664a"
+  },
+  {
+   "path": "built_ins.lf",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "97ddb56fa478202c62d2f62529164e179541d58b"
+  },
+  {
+   "path": "built_ins.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6c962a52aecd35e3bd714ee177b35e444eba4457"
+  },
+  {
+   "path": "c_life.a",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "73314e1add532cd9aac623497c3b18fafb94fd76"
+  },
+  {
+   "path": "c_life.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "0a00e99e0865b84816b2a2a866c64bb1de287bd2"
+  },
+  {
+   "path": "copy.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "ad22ca761d88a4e92a72f975e15546defb6cb878"
+  },
+  {
+   "path": "copy.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "36c2b0cab12c26c4fa3c8ecdf04f8d815e829c67"
+  },
+  {
+   "path": "copy.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "30a9a045fb52c51e4af768d46ea4c73c33d36bdb"
+  },
+  {
+   "path": "error.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "7b3f68880a03aae569c8e88b4a7d0d5a6a49bbc6"
+  },
+  {
+   "path": "error.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "12521f14d3e8fc89835f744fa6a6a19ea2227efb"
+  },
+  {
+   "path": "error.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "b7191e07116baa6ea13df4fa4f5a7d3175c248ed"
+  },
+  {
+   "path": "extern.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "ff828b0e5390b17a711707543e20f830eca7dc71"
+  },
+  {
+   "path": "hash_table.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c81e04fe574c440e16b1f877fcd6e4062eaefcca"
+  },
+  {
+   "path": "hash_table.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "87d8789276b599fb8d021548798a6033053a89f9"
+  },
+  {
+   "path": "info.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "7813e16a0c843814803198aeca37ff7cfb4b0d59"
+  },
+  {
+   "path": "info.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "fef2ab14432bff702b008cc0af089ab1cd3d3f00"
+  },
+  {
+   "path": "info.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1f23afe043356dd35ab702bd015a053fe757b83d"
+  },
+  {
+   "path": "interrupt.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "ff848c4eecae809466316cc8479a1ccb20ce3320"
+  },
+  {
+   "path": "interrupt.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "4476047d98014303af098a36c794cb646a54f903"
+  },
+  {
+   "path": "interrupt.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "d5d5fc3685089ca03b0d927e534cc7f2a47eb6ee"
+  },
+  {
+   "path": "lefun.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c9cbdef11f657fb9c529ac2fbe213b9ec4f377cc"
+  },
+  {
+   "path": "lefun.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "45c241c5580223de8eebf9acedd5bfcd4e3991a2"
+  },
+  {
+   "path": "lefun.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "538750df4236370016977886ac5cee94f01bc724"
+  },
+  {
+   "path": "lib.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "992791d544aaf03341a0593b54fa35d79b14666c"
+  },
+  {
+   "path": "life.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "6013d10191b62814d3cd03fba5b63e9015abc51f"
+  },
+  {
+   "path": "life_icon",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c80a612e67565315bb9dba70cd4c70818b562cf2"
+  },
+  {
+   "path": "list.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "60e39878a8637ac3e37c3b0123790d5de307165f"
+  },
+  {
+   "path": "list.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "80a83cd50483ce1791e2ca4da343e592a8e4d0cc"
+  },
+  {
+   "path": "list.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "b2baf300a44b41d8ad8445bf79c21911be22a11d"
+  },
+  {
+   "path": "login.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "5f9a336c529ff3b48a47a03024565476c5532ed1"
+  },
+  {
+   "path": "login.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "ce904f06a5a33940a1b17ae4ad7b8c0cd2fbdbfe"
+  },
+  {
+   "path": "login.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "f417e526c7c65f98437a8af8146fe8ad8b3bc6ab"
+  },
+  {
+   "path": "lub",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "3b0f935bedfc64bfb6de8de1a83f0ca1703e5334"
+  },
+  {
+   "path": "lub.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "c5217356ad328d3ea10d2c02e118537cd7b43427"
+  },
+  {
+   "path": "lub.jun22",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "908a85fafed3fde408136d43315f3264767721fb"
+  },
+  {
+   "path": "lub.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "04346fc352ef3d7b6379f81344a0d2b3ae98d771"
+  },
+  {
+   "path": "memory.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "b829773a98a2afde77578f6e1216486cdc147dc3"
+  },
+  {
+   "path": "memory.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1fb8f191fab096f8232515e4980db88bcc0f0bcb"
+  },
+  {
+   "path": "memory.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "5069788ab9080fa5db5c364e7c1f12ea60d25c59"
+  },
+  {
+   "path": "modules.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "936f68eaaadf9ccbcfba363b49dfb31b80883adb"
+  },
+  {
+   "path": "modules.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1528d52101d09066edd5681ad14a192162cf5bd9"
+  },
+  {
+   "path": "modules.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "f5342013d30ed7cc0e37ad1a17b2dc7c417053e1"
+  },
+  {
+   "path": "onlinedoc.lf",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "aea7f07d1732702c2aee77639043001669042fc8"
+  },
+  {
+   "path": "parser.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "12b28e1b8ad4d5c5b6dedadf27703fa120077e7c"
+  },
+  {
+   "path": "parser.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "b96cc36d27a60258dcfafc9daa3fd9cab6ec159b"
+  },
+  {
+   "path": "parser.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "b60aa3ee9bd645e30e2d22e702148d82b65208e1"
+  },
+  {
+   "path": "print.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "5e6438c78373fb33538a9d2a359e8557241a0867"
+  },
+  {
+   "path": "print.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1fc6e0ca73c7e5dddd2dfa3bc9bc3743ba55c22f"
+  },
+  {
+   "path": "print.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "56a23211426895dd04a7b9cdeaaa22a7f8fa8e43"
+  },
+  {
+   "path": "raw.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "5c563b2c475338c8fc2ac8162c9a681343d63eee"
+  },
+  {
+   "path": "raw.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1c58266f7a0f4c014e2686db2ef27c4562cc37cb"
+  },
+  {
+   "path": "raw.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "e590e0505beddd7d21a89858208156e2b22817f5"
+  },
+  {
+   "path": "templates.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "67317a7a85c6368dd87b6ae8cf3c506189aaac09"
+  },
+  {
+   "path": "templates.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "1439177e64e9207e1dc858a691654795cdfdb945"
+  },
+  {
+   "path": "templates.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "d4f38e91a36f716a826bdc2ef84ded9f61966b1f"
+  },
+  {
+   "path": "term_expansion.lf",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "2f7d5b37196a579d0989e579841623b5d5523a88"
+  },
+  {
+   "path": "token.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "f2cbc1274485a263102ee73aaa1c3d03e5d23f57"
+  },
+  {
+   "path": "token.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "3979c19d6311433afaad4fb20747b626ed9c09ab"
+  },
+  {
+   "path": "token.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "997e9b88afcb86248eefa156d316ffe5c7196af1"
+  },
+  {
+   "path": "trees.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "813b5a72f01a8eba74473d10fedce33fe47bb0bb"
+  },
+  {
+   "path": "trees.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "9364c8e4e81166930f06eafcffa7e82066cffa17"
+  },
+  {
+   "path": "trees.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "b9ac0ee7701902670f5194fa46791958439ccb29"
+  },
+  {
+   "path": "types.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "cf0832b2653f7819ae03724fa4e26e416b566a6b"
+  },
+  {
+   "path": "types.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "31558b5104e86327d8bcd08e1bd95eb41397b2b2"
+  },
+  {
+   "path": "types.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "359d00875725480dbe773da19f08d6c1f9aa7023"
+  },
+  {
+   "path": "wild_life",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "7987ae8c615ba159bb9b29d9d94919f0d3000ddd"
+  },
+  {
+   "path": "wild_life.1",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "de3ce682b5742a8b3c09691bbfe82663950f4abd"
+  },
+  {
+   "path": "xdisplaylist.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "ff7bbf532a8c7991cdb8a9eb36f2bf67fa9c6847"
+  },
+  {
+   "path": "xdisplaylist.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "cf8db0156c299f129ba0b985199da31f31191fdb"
+  },
+  {
+   "path": "xdisplaylist.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "a7e48d066b86f64e476375fd5295c3f670517dd8"
+  },
+  {
+   "path": "xpred.c",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "09bcabfe7dbb94fe451498c874bc6529ba45a516"
+  },
+  {
+   "path": "xpred.h",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "bb9676b591df03fa1799e4305868778559e80e0d"
+  },
+  {
+   "path": "xpred.o",
+   "type": "file",
+   "mode": "100755",
+   "git_blob_sha1": "42595822c71017cb2681cdb65176004e843aa134"
+  }
+ ],
+ "generator": {
+  "tool": "derive_manifests.py (M1c regeneration)",
+  "schema": "swhap-tree-manifest/1",
+  "derivation": "git ls-tree of the curated Model-P v1.02 tag tree; AppleDouble ._* (257) excluded, 4 absolute-target symlinks preserved verbatim as broken-artifact 120000 blobs, exec bit -> 100755. The quarantined census fixtures/wildlife/manifests/1.02.json is the untouched forensic record and is NOT replaced."
+ }
+}
