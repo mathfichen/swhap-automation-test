@@ -3,7 +3,12 @@ name = "swhap-validate"
 version = "0.1.0"
 description = "SWHAP compliance validator (check_swhap.sh / swhap-validate)"
 requires-python = ">=3.11"
-# Runtime: stdlib only. Optional: pyld (CM-3 JSON-LD) — clearly skipped if absent.
+# Runtime: stdlib only. The CSV-1..7 check imports the first-party, stdlib-only
+# `swhap_core.vhcsv` module (co-installed editable alongside this package in every
+# supported path — see the repo-root pyproject and CI: `pip install -e swhap-core
+# -e tools/validator`). It is intentionally NOT listed as a PyPI dependency: the
+# sibling is unpublished, and pinning it here would only break the editable co-install.
+# Optional: pyld (CM-3 JSON-LD) — clearly skipped if absent.
 dependencies = []
 
 [project.optional-dependencies]

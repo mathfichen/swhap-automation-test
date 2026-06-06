@@ -1,57 +1,77 @@
-"""CSV-1..7 — version_history.csv contract (csv-contract.md, frozen grammar).
+"""CSV-1..7 — version_history.csv contract, delegated to ``swhap_core.vhcsv``.
 
-CSV-1 is a validator-LOCAL byte-exact header check (parser-independent, M1a).
-CSV-2..7 implement the frozen grammar locally for the M1a slice; once
-swhap_core.vhcsv lands (core T4, M1c) the grammar parse/date/legacy logic is to
-be delegated there (the validator never re-implements it long term). Diagnostics
-map to check ids per csv-contract §10:
-  CSV-HEADER→CSV-1, CSV-FIELD→CSV-2/CSV-6, CSV-DATE/CSV-TZ→CSV-3,
-  CSV-TAG→CSV-4, CSV-DUP-*→CSV-5, CSV-DATE-ORDER→CSV-7 (WARN).
+The frozen csv-contract.md grammar (header §2.1, RFC-4180 structure §2.4, field
+allowlist §8, email §5.3, date §4, tag §6, uniqueness §7, monotonicity §7) has a
+SINGLE implementation: ``swhap_core.vhcsv`` (core T4). This check is now a THIN
+adapter — it no longer re-implements any grammar. It calls
+``vhcsv.parse(profile='canonical')`` and maps the returned ``CSV-*`` diagnostics
+onto the validator's CSV-1..7 findings per csv-contract §10:
+
+    CSV-HEADER → CSV-1 (byte-exact header incl. BOM §2.2)
+    CSV-FIELD  → CSV-2 (§2.4 structure / §3 arity-empties / §5.3 email)
+              or CSV-6 (§8 field allowlist)
+    CSV-DATE / CSV-TZ → CSV-3
+    CSV-TAG    → CSV-4
+    CSV-DUP-DIR / CSV-DUP-TAG → CSV-5
+    CSV-DATE-ORDER (WARN) → CSV-7
+
+Severity is the closed FAIL/WARN/INFO enum shared with the report schema
+(validator-report §2.3). Per csv-contract §10 the two file-level **INFO** notes
+(§2.4 unnecessary quoting; §4.5 skipped future-date check) "raise nothing and
+never affect exit status" and reuse stable FAIL code strings — so this adapter
+FILTERS BY SEVERITY (FAIL + the CSV-7 WARN), never by code, and does not surface
+the INFO notes as CSV-1..7 findings (matching the M1a validator behaviour and the
+frozen test contract). The only logic kept validator-LOCAL is the file-presence
+precondition (a missing file is not a grammar question) and the byte-exact
+header literal reused by the CLI. Runtime: stdlib only (``swhap_core.vhcsv`` is
+itself stdlib-only).
 """
 from __future__ import annotations
 
-import csv as _csv
-import io
-import re
-import unicodedata
+from swhap_core import vhcsv
 
 from ..report import FAIL, WARN, Finding
 
-CANONICAL_HEADER = (
-    "directory name,date,author name,author email,"
-    "curator name,curator email,release tag,commit message"
-)
-CANONICAL_HEADER_BYTES = CANONICAL_HEADER.encode("ascii")
-BOM = b"\xef\xbb\xbf"
+# Reused by the CLI (intake_profile sniff) and the test suite. The single source
+# of truth is the core module; we re-export it under the historical names.
+CANONICAL_HEADER = vhcsv.CANONICAL_HEADER
+CANONICAL_HEADER_BYTES = vhcsv.HEADER_BYTES
 
-# Legacy dialects (csv-contract §11.0.1), field-4 label differs.
-_LEGACY_TOKENS = {
-    "unipisa": ["directory name", "author name", "author email", "date",
-                "curator name", "curator email", "release tag", "commit message"],
-    "guide": ["directory name", "author name", "author email", "date original",
-              "curator name", "curator email", "release tag", "commit message"],
+# vhcsv CSV-* code → validator check id (csv-contract §10). CSV-FIELD is the one
+# code that splits across two checks; resolved by violated section below.
+_CODE_TO_CHECK = {
+    vhcsv.CSV_HEADER: "CSV-1",
+    vhcsv.CSV_DATE: "CSV-3",
+    vhcsv.CSV_TZ: "CSV-3",
+    vhcsv.CSV_TAG: "CSV-4",
+    vhcsv.CSV_DUP_DIR: "CSV-5",
+    vhcsv.CSV_DUP_TAG: "CSV-5",
+    vhcsv.CSV_DATE_ORDER: "CSV-7",
 }
 
-_FIELDS = ["directory name", "date", "author name", "author email",
-           "curator name", "curator email", "release tag", "commit message"]
 
-_ADDR_SPEC = re.compile(
-    r"^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*"
-    r"@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+$"
-)
-_LEN_CAPS = {0: 255, 2: 255, 4: 255, 3: 254, 5: 254, 6: 128, 7: 16384}
-
-
-def _legacy_match(tokens):
-    norm = [t.strip().casefold() for t in tokens]
-    for name, ref in _LEGACY_TOKENS.items():
-        if norm == [t.casefold() for t in ref]:
-            return name
-    return None
+def _check_id(diag) -> str:
+    cid = _CODE_TO_CHECK.get(diag.code)
+    if cid is not None:
+        return cid
+    # CSV-FIELD: §8 allowlist violations are CSV-6; everything else (§2.x
+    # structure, §3 arity/empties, §5.3 email syntax, §7 no-data-rows) is CSV-2.
+    if diag.code == vhcsv.CSV_FIELD:
+        return "CSV-6" if (diag.section or "").startswith("§8") else "CSV-2"
+    # Defensive default: any unmapped FAIL still surfaces (never silently lost).
+    return "CSV-2"
 
 
 def run(report, *, csv_bytes, profile, reference_date=None):
+    """Validate ``metadata/version_history.csv`` (canonical profile).
+
+    ``reference_date`` is the §4.5 future-date baseline. The CLI passes an int
+    epoch (``cli._parse_reference_date``); we wrap it as a ``ParsedDate`` so the
+    core parser (which accepts ``None`` / ``str`` / ``ParsedDate``) can apply the
+    check without re-deriving any date math.
+    """
     report.ran("CSV-1")
+
     if csv_bytes is None:
         report.add(Finding(
             "CSV-1", FAIL, {"path": "metadata/version_history.csv"}, ["path"],
@@ -60,347 +80,85 @@ def run(report, *, csv_bytes, profile, reference_date=None):
         ))
         return
 
+    # CSV-2..7 are "reachable" exactly when the header is byte-exact (otherwise
+    # the core parser stops at the header diagnostic). Mirror that so the report
+    # pass-count reflects which checks actually got to evaluate rows.
     first_line = csv_bytes.split(b"\n", 1)[0].rstrip(b"\r")
+    if first_line == CANONICAL_HEADER_BYTES:
+        for cid in ("CSV-2", "CSV-3", "CSV-4", "CSV-5", "CSV-6", "CSV-7"):
+            report.ran(cid)
 
-    if first_line.startswith(BOM):
-        report.add(Finding(
-            "CSV-1", FAIL, {"path": "metadata/version_history.csv"}, ["path"],
-            "version_history.csv starts with a UTF-8 BOM, which must be removed.",
-            message_technical="file starts with a UTF-8 BOM — remove it",
-            remediation="Save the file as UTF-8 without a byte-order mark.",
-        ))
-        return
+    ref = reference_date
+    if isinstance(ref, int):
+        ref = vhcsv.ParsedDate(ref, 0, "second")
 
-    if first_line != CANONICAL_HEADER_BYTES:
-        # Canonical profile: any deviation is CSV-HEADER FAIL. Add a hint if it
-        # looks like a recognized legacy dialect.
-        try:
-            tokens = next(_csv.reader([first_line.decode("utf-8", "replace")]))
-        except Exception:
-            tokens = first_line.decode("utf-8", "replace").split(",")
-        legacy = _legacy_match(tokens)
-        if legacy:
-            hint = ("legacy Unipisa/guide dialect — use "
-                    "`swhap csv convert --from unipisa`")
-            tech = f"non-canonical header; matches legacy '{legacy}' dialect"
-        else:
-            hint = "use the canonical 8-column SWHAP header"
-            tech = ("header not byte-exact; expected: " + CANONICAL_HEADER)
-        report.add(Finding(
-            "CSV-1", FAIL, {"path": "metadata/version_history.csv"}, ["path"],
-            "version_history.csv does not use the canonical SWHAP header, so the "
-            "release history cannot be read.",
-            message_technical=tech,
-            remediation=hint,
-        ))
-        return
+    result = vhcsv.parse(csv_bytes, profile="canonical", reference_date=ref)
 
-    # Header is canonical → parse and run CSV-2..7.
-    try:
-        text = csv_bytes.decode("utf-8")
-    except UnicodeDecodeError as exc:
-        report.add(Finding(
-            "CSV-2", FAIL, {"path": "metadata/version_history.csv"}, ["path"],
-            "version_history.csv is not valid UTF-8.",
-            message_technical=f"utf-8 decode error at byte {exc.start}",
-        ))
-        return
-
-    rows = list(_csv.reader(io.StringIO(text)))
-    data = rows[1:]
-    _check_rows(report, data, profile, reference_date)
-
-
-def _check_rows(report, data, profile, reference_date):
-    for cid in ("CSV-2", "CSV-3", "CSV-4", "CSV-5", "CSV-6", "CSV-7"):
-        report.ran(cid)
-
-    # drop trailing empty line artifact
-    data = [r for r in data if r != []]
-    if not data:
-        report.add(Finding(
-            "CSV-2", FAIL, {"path": "metadata/version_history.csv"}, ["path"],
-            "version_history.csv has a header but no release rows.",
-        ))
-        return
-
-    dir_seen, tag_seen = {}, {}
-    prev_instant = None
-    for i, row in enumerate(data):
-        rown = i + 1  # data row number (1-based, header excluded)
-        if len(row) != 8:
-            report.add(Finding(
-                "CSV-2", FAIL, {"row": rown, "field_count": len(row)},
-                ["row"],
-                f"Row {rown} of version_history.csv has {len(row)} fields "
-                "instead of the required 8.",
-                message_technical="CSV-FIELD: arity != 8",
-            ))
+    # Filter by SEVERITY, not code: surface FAIL + the CSV-7 WARN; drop the
+    # file-level INFO notes (csv-contract §10 — they affect nothing).
+    for diag in result.diagnostics:
+        if diag.severity not in (FAIL, WARN):
             continue
-        fields = dict(zip(_FIELDS, row))
-
-        _check_field_allowlist(report, rown, row)
-        _check_emails(report, rown, fields)
-        instant = _check_date(report, rown, fields["date"], reference_date)
-        _check_tag(report, rown, fields["release tag"])
-
-        # uniqueness (CSV-5) via casefold(NFC) folding
-        dkey = _fold(fields["directory name"])
-        if dkey in dir_seen:
-            report.add(Finding(
-                "CSV-5", FAIL, {"rows": sorted([dir_seen[dkey], rown])},
-                ["rows"],
-                f"Rows {dir_seen[dkey]} and {rown} have colliding directory names.",
-                message_technical="CSV-DUP-DIR: casefold(NFC) collision",
-            ))
-        else:
-            dir_seen[dkey] = rown
-        tkey = _fold(fields["release tag"])
-        if tkey in tag_seen:
-            report.add(Finding(
-                "CSV-5", FAIL, {"rows": sorted([tag_seen[tkey], rown])},
-                ["rows"],
-                f"Rows {tag_seen[tkey]} and {rown} have colliding release tags.",
-                message_technical="CSV-DUP-TAG: casefold(NFC) collision",
-            ))
-        else:
-            tag_seen[tkey] = rown
-
-        # CSV-7 monotonicity (WARN)
-        if instant is not None and prev_instant is not None and instant < prev_instant:
-            report.add(Finding(
-                "CSV-7", WARN, {"row": rown}, ["row"],
-                f"Row {rown} has an earlier date than the row before it; the "
-                "curator should confirm this is the real history.",
-                message_technical="CSV-DATE-ORDER",
-                required_approver_role="curator",
-            ))
-        if instant is not None:
-            prev_instant = instant
+        _emit(report, diag)
 
 
-def _fold(s):
-    return unicodedata.normalize("NFC", s).casefold()
+def _emit(report, diag):
+    check_id = _check_id(diag)
+    obj, keys = _subject(diag, check_id)
+    report.add(Finding(
+        check_id, diag.severity, obj, keys,
+        _plain(diag),
+        message_technical=_technical(diag),
+        required_approver_role="curator",
+    ))
 
 
-def _check_field_allowlist(report, rown, row):
-    for idx, val in enumerate(row):
-        fname = _FIELDS[idx]
-        # control chars (Cc) — LF allowed only in commit message (idx 7)
-        for k, ch in enumerate(val):
-            cat = unicodedata.category(ch)
-            if cat == "Cc" and not (idx == 7 and ch == "\n"):
-                report.add(Finding(
-                    "CSV-6", FAIL, {"row": rown, "field": fname, "char_index": k},
-                    ["row", "field", "char_index"],
-                    f"Row {rown} field '{fname}' contains a control character "
-                    "that is not allowed.",
-                    message_technical=f"CSV-FIELD: Cc U+{ord(ch):04X} at char {k}",
-                ))
-                break
-            if cat == "Cf":
-                name = unicodedata.name(ch, "")
-                report.add(Finding(
-                    "CSV-6", FAIL, {"row": rown, "field": fname, "char_index": k},
-                    ["row", "field", "char_index"],
-                    f"Row {rown} field '{fname}' contains an invisible formatting "
-                    "character that is not allowed.",
-                    message_technical=f"CSV-FIELD: U+{ord(ch):04X} {name} at char {k}",
-                ))
-                break
-        # empties
-        if val == "":
-            report.add(Finding(
-                "CSV-2", FAIL, {"row": rown, "field": fname}, ["row", "field"],
-                f"Row {rown} field '{fname}' is empty; all 8 fields are required.",
-                message_technical="CSV-FIELD: empty field",
-            ))
-            continue
-        # leading/trailing whitespace
-        if val != val.strip():
-            report.add(Finding(
-                "CSV-6", FAIL, {"row": rown, "field": fname}, ["row", "field"],
-                f"Row {rown} field '{fname}' has leading or trailing whitespace.",
-                message_technical="CSV-FIELD: edge whitespace",
-            ))
-        # leading dash forbidden in fields 1-7
-        if idx != 7 and val.startswith("-"):
-            report.add(Finding(
-                "CSV-6", FAIL, {"row": rown, "field": fname}, ["row", "field"],
-                f"Row {rown} field '{fname}' starts with '-', which is not allowed.",
-                message_technical="CSV-FIELD: leading dash (argv-injection hygiene)",
-            ))
-        # length cap
-        cap = _LEN_CAPS.get(idx)
-        if cap and len(val.encode("utf-8")) > cap:
-            report.add(Finding(
-                "CSV-6", FAIL, {"row": rown, "field": fname}, ["row", "field"],
-                f"Row {rown} field '{fname}' is too long (> {cap} bytes).",
-                message_technical=f"CSV-FIELD: exceeds {cap}-byte cap",
-            ))
-        # <> in name fields
-        if fname in ("author name", "curator name") and ("<" in val or ">" in val):
-            report.add(Finding(
-                "CSV-6", FAIL, {"row": rown, "field": fname}, ["row", "field"],
-                f"Row {rown} field '{fname}' contains '<' or '>', which are not "
-                "allowed in a name.",
-                message_technical="CSV-FIELD: git-ident-meaningful <> in name",
-            ))
-        # directory name single component / traversal
-        if fname == "directory name":
-            if "/" in val or "\\" in val or val in (".", "..") \
-                    or val.startswith(".") or ":" in val:
-                report.add(Finding(
-                    "CSV-6", FAIL, {"row": rown, "field": fname}, ["row", "field"],
-                    f"Row {rown} directory name '{val}' is not a single safe path "
-                    "component.",
-                    message_technical="CSV-FIELD: not one path component / traversal",
-                ))
+def _subject(diag, check_id):
+    """Build the finding object + subject keys (the finding-id basis, §2.1)."""
+    if check_id == "CSV-1":
+        return {"path": "metadata/version_history.csv"}, ["path"]
+
+    # Duplicate dir/tag: the subject is the colliding row PAIR (stable id).
+    other = diag.extra.get("other_row") if diag.extra else None
+    if other is not None and diag.row is not None:
+        return {"rows": sorted([other, diag.row])}, ["rows"]
+
+    obj: dict = {}
+    keys: list[str] = []
+    if diag.row is not None:
+        obj["row"] = diag.row
+        keys.append("row")
+    if diag.field_name is not None:
+        obj["field"] = diag.field_name
+        keys.append("field")
+    if diag.char_index is not None:
+        obj["char_index"] = diag.char_index
+        keys.append("char_index")
+    if not keys:  # file-level (e.g. UTF-8 decode, header-only) → stable path id
+        return {"path": "metadata/version_history.csv"}, ["path"]
+    return obj, keys
 
 
-def _check_emails(report, rown, fields):
-    for fname in ("author email", "curator email"):
-        val = fields[fname]
-        if val == "":
-            continue
-        if not _ADDR_SPEC.match(val):
-            report.add(Finding(
-                "CSV-2", FAIL, {"row": rown, "field": fname}, ["row", "field"],
-                f"Row {rown} field '{fname}' is not a valid email address.",
-                message_technical="CSV-FIELD: not a bare RFC 5322 addr-spec",
-            ))
+def _plain(diag) -> str:
+    """Plain-language, forge-safe message. The core diagnostics never echo a raw
+    control byte (offenders are named by code point), but run through bsafe_str
+    anyway so no control char can reach a forge-visible report (§2.5a)."""
+    from ..report import bsafe_str
+
+    prefix = ""
+    if diag.row is not None:
+        where = f"Row {diag.row}"
+        if diag.field_name:
+            where += f" field '{diag.field_name}'"
+        prefix = where + ": "
+    return bsafe_str(prefix + diag.message)
 
 
-_DATE_FULL = re.compile(
-    r"^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})"
-    r"(Z|[+-]\d{2}:\d{2})$")
-_DATE_DAY = re.compile(r"^(\d{4})-(\d{2})-(\d{2})$")
-_DATE_YEAR = re.compile(r"^(\d{4})$")
+def _technical(diag) -> str:
+    """Code- and section-tagged technical string. Carries the stable ``CSV-*``
+    code verbatim (e.g. ``CSV-TZ``) and any named code point, which downstream
+    tooling and the frozen tests key on."""
+    from ..report import bsafe_str
 
-
-def _check_date(report, rown, val, reference_date):
-    """Return the UTC instant (epoch seconds) on success, else None.
-    Emits CSV-3 findings for grammar/calendar/tz/future violations."""
-    import calendar
-    import datetime as dt
-
-    def fail(msg, tech):
-        report.add(Finding(
-            "CSV-3", FAIL, {"row": rown, "field": "date"}, ["row", "field"],
-            msg, message_technical=tech,
-            remediation="Use ISO-8601: YYYY, YYYY-MM-DD, or "
-            "YYYY-MM-DDTHH:MM:SS±HH:MM.",
-        ))
-
-    m = _DATE_FULL.match(val)
-    if m:
-        y, mo, d, hh, mm, ss, off = m.groups()
-        y, mo, d, hh, mm, ss = map(int, (y, mo, d, hh, mm, ss))
-        if off != "Z":
-            oh, om = int(off[1:3]), int(off[4:6])
-            if not (-12 <= (oh if off[0] == "+" else -oh) <= 14) or om > 59:
-                fail(f"Row {rown} date has an out-of-range timezone offset.",
-                     "CSV-DATE: offset out of range")
-                return None
-        try:
-            base = dt.datetime(y, mo, d, hh, mm, ss)
-        except ValueError:
-            fail(f"Row {rown} date '{val}' is not a real calendar date/time.",
-                 "CSV-DATE: invalid calendar value")
-            return None
-        offset_sec = 0
-        if off != "Z":
-            sign = 1 if off[0] == "+" else -1
-            offset_sec = sign * (int(off[1:3]) * 3600 + int(off[4:6]) * 60)
-        instant = calendar.timegm(base.timetuple()) - offset_sec
-        return _future_check(report, rown, val, instant, reference_date)
-
-    m = _DATE_DAY.match(val)
-    if m:
-        y, mo, d = map(int, m.groups())
-        try:
-            base = dt.datetime(y, mo, d)
-        except ValueError:
-            fail(f"Row {rown} date '{val}' is not a real calendar date.",
-                 "CSV-DATE: invalid calendar value")
-            return None
-        instant = calendar.timegm(base.timetuple())
-        return _future_check(report, rown, val, instant, reference_date)
-
-    m = _DATE_YEAR.match(val)
-    if m:
-        y = int(m.group(1))
-        instant = calendar.timegm(dt.datetime(y, 1, 1).timetuple())
-        return _future_check(report, rown, val, instant, reference_date)
-
-    # Not one of the three forms. Distinguish naive-time (CSV-TZ) from grammar.
-    if re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$", val):
-        report.add(Finding(
-            "CSV-3", FAIL, {"row": rown, "field": "date"}, ["row", "field"],
-            f"Row {rown} date '{val}' has a time but no timezone offset; the "
-            "timezone must be given explicitly.",
-            message_technical="CSV-TZ: naive timestamp",
-            remediation="Add a UTC offset, e.g. ...T10:00:00+00:00.",
-        ))
-        return None
-    fail(f"Row {rown} date '{val}' is not an accepted date form.",
-         "CSV-DATE: grammar")
-    return None
-
-
-def _future_check(report, rown, val, instant, reference_date):
-    if reference_date is None:
-        return instant  # §4.5: not evaluated without a reference (INFO carried elsewhere)
-    if instant > reference_date:
-        report.add(Finding(
-            "CSV-3", FAIL, {"row": rown, "field": "date"}, ["row", "field"],
-            f"Row {rown} date '{val}' is in the future relative to the "
-            "acquisition; release dates must be historical.",
-            message_technical="CSV-DATE: future date (reference-pinned)",
-        ))
-        return None
-    return instant
-
-
-def _check_tag(report, rown, tag):
-    bad = _ref_format_violation(tag)
-    if bad:
-        report.add(Finding(
-            "CSV-4", FAIL, {"row": rown, "field": "release tag"},
-            ["row", "field"],
-            f"Row {rown} release tag '{tag}' is not a valid git tag name.",
-            message_technical=f"CSV-TAG: {bad}",
-            remediation="Use a tag like v1.0.",
-        ))
-        return
-    if tag.startswith("candidate/") or tag.startswith("scratch/"):
-        report.add(Finding(
-            "CSV-4", FAIL, {"row": rown, "field": "release tag"},
-            ["row", "field"],
-            f"Row {rown} release tag '{tag}' uses a reserved namespace.",
-            message_technical="CSV-TAG: reserved candidate/ or scratch/ namespace",
-        ))
-
-
-def _ref_format_violation(tag):
-    """Pure-Python equivalent of git check-ref-format refs/tags/<tag>."""
-    if tag == "" or tag == "@":
-        return "empty or '@'"
-    if tag.startswith("/") or tag.endswith("/") or "//" in tag:
-        return "leading/trailing or double slash"
-    if tag.endswith("."):
-        return "trailing dot"
-    if ".." in tag:
-        return "contains '..'"
-    if "@{" in tag:
-        return "contains '@{'"
-    for ch in tag:
-        o = ord(ch)
-        if o < 0x20 or o == 0x7F or ch in " ~^:?*[\\":
-            return f"forbidden character U+{o:04X}"
-    for comp in tag.split("/"):
-        if comp.startswith("."):
-            return "component starts with '.'"
-        if comp.endswith(".lock"):
-            return "component ends with '.lock'"
-    return None
+    sec = f" {diag.section}" if diag.section else ""
+    return bsafe_str(f"{diag.code}{sec}: {diag.message}")
