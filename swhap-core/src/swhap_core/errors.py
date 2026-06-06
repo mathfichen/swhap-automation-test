@@ -112,6 +112,11 @@ class SwhapError(Exception):
         super().__init__(message)
         if code is not None:
             self.code = code
+        # exit code follows the stable code when known (e.g. HB-REF-POLICY → 14,
+        # other HB-* → 13), else the family default.
+        spec = CODES.get(self.code)
+        if spec is not None:
+            self.exit_code = spec.exit_code
         self.message = message
         self.fields = fields
 
