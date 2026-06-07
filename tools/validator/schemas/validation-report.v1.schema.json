@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:swhap:schema:validation-report:v1",
   "title": "SWHAP validation report (v1)",
-  "description": "Machine-readable report emitted by swhap-validate / check_swhap.sh. Status: DRAFT pending W1 sign-off. Prose contract: specs/validator-report.md (semantics: exit mapping, determinism, versioning); this schema governs shape. schema_version is the constant \"1\" for the entire v1.x line; additive (minor) evolution keeps the open content model, so consumers MUST be tolerant readers. Canonical serialization: UTF-8, LF, one trailing newline, 2-space indent, keys sorted byte-wise, findings sorted by id.",
+  "description": "Machine-readable report emitted by swhap-validate / check_swhap.sh. Status: FROZEN (W1 sign-off 2026-06-05). Prose contract: specs/validator-report.md (semantics: exit mapping, determinism, versioning); this schema governs shape. schema_version is the constant \"1\" for the entire v1.x line; additive (minor) evolution keeps the open content model, so consumers MUST be tolerant readers. Canonical serialization: UTF-8, LF, one trailing newline, 2-space indent, keys sorted byte-wise, findings sorted by id.",
   "type": "object",
   "required": ["schema_version", "tool", "run", "summary", "findings"],
   "properties": {

@@ -114,6 +114,88 @@ def cmd_build(args: argparse.Namespace) -> int:
         return EXIT_INTERNAL
 
 
+def cmd_publish(args: argparse.Namespace) -> int:
+    from .gitio import GitRunner
+    from .publish import (
+        RemotePushTarget,
+        SaveCodeNowArchiver,
+        do_publish,
+        do_publish_supersede,
+    )
+
+    try:
+        git = GitRunner(args.workbench, allow_publish=True)
+        push_target = RemotePushTarget(args.remote)
+        archiver = SaveCodeNowArchiver() if args.save_code_now else None
+        if args.supersede:
+            if archiver is None:
+                sys.stderr.write("swhap publish --supersede needs --save-code-now (prior must be archived)\n")
+                return EXIT_USAGE
+            if not args.curator_name or not args.curator_email:
+                sys.stderr.write("swhap publish --supersede needs --curator-name and --curator-email\n")
+                return EXIT_USAGE
+            curator = {
+                "kind": "curator",
+                "name": args.curator_name,
+                "tool": "swhap",
+                "version": __version__,
+                "login": args.curator_login or args.curator_email,
+                "role": "curator",
+                "verified_via": "cli",
+            }
+            res = do_publish_supersede(
+                args.workbench,
+                candidate_ref=args.candidate_ref,
+                final_repo=args.final_repo,
+                curator=curator,
+                push_target=push_target,
+                archiver=archiver,
+                reason=args.reason or "rebuild-and-replace (revised D3)",
+                git=git,
+            )
+            _emit(
+                {
+                    "schema": "swhap-core/publish/v1",
+                    "phase": "supersede",
+                    "final_repo": res.final_repo,
+                    "prior_snapshot_swhid": res.prior_snapshot_swhid,
+                    "new_snapshot_swhid": res.new_snapshot_swhid,
+                    "sign_off_entry_id": res.sign_off_entry_id,
+                    "executed_entry_id": res.executed_entry_id,
+                    "target_refs": res.target_refs,
+                }
+            )
+            return EXIT_OK
+        res = do_publish(
+            args.workbench,
+            candidate_ref=args.candidate_ref,
+            final_repo=args.final_repo,
+            push_target=push_target,
+            archiver=archiver,
+            git=git,
+        )
+        _emit(
+            {
+                "schema": "swhap-core/publish/v1",
+                "phase": "publish",
+                "final_repo": res.final_repo,
+                "sourcecode_tip": res.sourcecode_tip,
+                "snapshot_swhid": res.snapshot_swhid,
+                "rel_swhids": res.rel_swhids,
+                "dir_swhid": res.dir_swhid,
+                "codemeta_promoted": res.codemeta_promoted,
+                "publish_entry_id": res.publish_entry_id,
+            }
+        )
+        return EXIT_OK
+    except SwhapError as exc:
+        sys.stderr.write(f"swhap publish: [{exc.code}] {exc.message}\n")
+        return exc.exit_code
+    except Exception as exc:  # pragma: no cover - defensive
+        sys.stderr.write(f"swhap publish: internal error: {exc}\n")
+        return EXIT_INTERNAL
+
+
 def _plan_summary(plan) -> dict:
     return {
         "schema": "swhap-core/build/v1",
@@ -166,6 +248,24 @@ def build_parser() -> argparse.ArgumentParser:
     p_build.add_argument("--scratch", action="store_true", help="write to refs/scratch/** (rebuild-compare; not journaled)")
     p_build.add_argument("--json", action="store_true", help="emit JSON (default and only format)")
     p_build.set_defaults(func=cmd_build)
+
+    p_pub = sub.add_parser(
+        "publish",
+        help="promote a candidate to the published Model-P layout (SourceCode + tags); "
+        "--supersede for revised-D3 rebuild-and-replace",
+    )
+    p_pub.add_argument("--workbench", required=True, metavar="DIR")
+    p_pub.add_argument("--candidate-ref", required=True, metavar="REF", help="refs/heads/candidate/<model>/<run-id>")
+    p_pub.add_argument("--final-repo", required=True, metavar="URL", help="published origin URL (recorded + Save Code Now)")
+    p_pub.add_argument("--remote", required=True, metavar="URL", help="git push target for the published refs")
+    p_pub.add_argument("--save-code-now", action="store_true", help="trigger a Save Code Now visit of --final-repo")
+    p_pub.add_argument("--supersede", action="store_true", help="revised-D3 rebuild-and-replace of a published history")
+    p_pub.add_argument("--reason", metavar="TEXT", help="rewrite reason (supersede sign-off)")
+    p_pub.add_argument("--curator-name", metavar="NAME")
+    p_pub.add_argument("--curator-email", metavar="EMAIL")
+    p_pub.add_argument("--curator-login", metavar="LOGIN")
+    p_pub.add_argument("--json", action="store_true", help="emit JSON (default and only format)")
+    p_pub.set_defaults(func=cmd_publish)
     return parser
 
 
