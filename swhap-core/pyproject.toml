@@ -10,6 +10,13 @@ requires-python = ">=3.11"
 # stdlib-only at runtime (core-pipeline.md §2). pytest is dev-only.
 dependencies = []
 
+[project.optional-dependencies]
+# The M2 publish path (swhap_core.swhid / swhap_core.publish, `swhap publish`)
+# computes snapshot SWHIDs via swh.model — the ONLY non-stdlib runtime import,
+# scoped to that path by a lazy import. Everything else stays stdlib-only.
+publish = ["swh.model[cli]"]
+test = ["pytest", "jsonschema", "swh.model[cli]"]
+
 [project.scripts]
 swhap = "swhap_core.cli:main"
 

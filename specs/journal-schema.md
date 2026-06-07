@@ -405,23 +405,30 @@ subject to `rewrite-event` — that action governs git refs only.
 > branch with a freshly-rebuilt history **supersedes** the prior snapshot rather
 > than "invalidating" it. The decisive case is **chronological insertion** (a
 > release surfacing later that belongs *between* existing ones), which strict
-> append-only cannot represent correctly. Consequences for this section, landing
-> with the **M2 publish step** (the publish flow does not exist yet, so this is
-> recorded intent, not yet schema-enforced):
-> 1. The two-phase protocol below is **kept as the ceremony** for replacing a
->    published source ref, but reframed: the curator acknowledges a
->    *supersession*, not an *invalidation*.
-> 2. `details` of the sign-off gains a `supersedes_snapshot_swhid` field
->    recording the **SWH snapshot SWHID** of the archived prior history (the
->    durable lineage pointer), and the prior history MUST be archived in SWH
->    **before** replacement. `acknowledgement` becomes
->    `"prior-snapshot-archived-in-swh"`; `invalidated_swhids` is retired in favour
->    of this pointer (the prior SWHIDs are *preserved*, not invalidated).
+> append-only cannot represent correctly.
+>
+> **IMPLEMENTED 2026-06-07 (M2 publish step — `swhap_core.publish`,
+> `swhap publish --supersede`).** The items below are now schema-enforced
+> (`journal-entry.schema.json`, additive amendment 2026-06-07; `schema` stays
+> `swhap-journal/1`) and exercised by the chronological-insertion end-to-end test:
+> 1. The two-phase protocol (§8.2) is **kept as the ceremony** for replacing a
+>    published source ref, reframed: the curator acknowledges a *supersession*,
+>    not an *invalidation*.
+> 2. `details` of the sign-off carries `supersedes_snapshot_swhid` — the **SWH
+>    snapshot SWHID** of the archived prior history (the durable lineage pointer),
+>    computed **intrinsically/offline** from the prior published refs
+>    (`swhap_core.swhid.snapshot_swhid`, equal to `swh identify --type snapshot`).
+>    The prior history MUST be archived in SWH **before** replacement (the
+>    `swhap publish` Save-Code-Now adapter). `acknowledgement` is
+>    `"prior-snapshot-archived-in-swh"`; `invalidated_swhids` is **retired** in
+>    favour of this pointer (the prior SWHIDs are *preserved*, not invalidated).
+>    Legacy `"swhid-invalidation-acknowledged"` sign-offs remain schema-valid.
 > 3. `DV-1` retargets from "refuse any divergence" to "refuse *un-journaled,
 >    un-archived* divergence" — it blocks an accidental clobber, never a recorded
->    SWH-backed supersession.
-> The text below is the superseded interim wording, retained until the M2 step
-> implements the above.
+>    SWH-backed supersession. (Consumed by the validator workstream; the journaled
+>    record it reads is specified in §8.2.)
+> The interim wording below is retained for the legacy invalidation path, which
+> the schema still accepts.
 
 ### 8.2 `rewrite-event` — D3 interim escape hatch for published refs
 
@@ -444,6 +451,27 @@ sign-off with an SWHID-invalidation warning") is a two-phase ledger protocol:
    non-fast-forward rewrite of exactly the signed ref set — a months-later replay
    reusing the same sign-off, or an executed entry touching a sub/superset of the signed
    refs, both FAIL. Follow-up `publish-event` entries record the replacement SWHIDs.
+
+**Revised-D3 supersession record (the shape DV-1 consumes) — IMPLEMENTED
+2026-06-07.** For a rebuild-and-replace, the two `rewrite-event` entries are:
+
+1. **`phase: sign-off`** — `actor.kind: curator`; `details` carries:
+   - `phase: "sign-off"`
+   - `target_refs`: the published refs the rewrite touches (set-equal to the
+     executed entry's, §5.4 step 8.1)
+   - `reason`: free text
+   - `supersedes_snapshot_swhid`: the `swh:1:snp:…` of the **prior** published
+     history, archived in SWH **before** replacement (the durable lineage pointer)
+   - `acknowledgement: "prior-snapshot-archived-in-swh"`
+2. **`phase: executed`** — `actor.kind: machine`; `details` carries
+   `phase: "executed"`, the same `target_refs`, `sign_off_entry` (the sign-off's
+   ULID), `old_hashes` and `new_hashes`.
+
+DV-1 keys off the sign-off's `supersedes_snapshot_swhid` + `acknowledgement`
+pair: a divergent published ref backed by such a sign-off (whose
+`supersedes_snapshot_swhid` matches the snapshot SWHID of the *previously*
+published refs) and a matching executed entry is an **allowed**, recorded
+supersession; an un-journaled / un-archived divergence remains FAIL.
 
 DV-1 treats a divergent published ref **without** a matching executed `rewrite-event`
 as FAIL; with one, it downgrades to a flagged, explained WARN. If the D3 final ruling

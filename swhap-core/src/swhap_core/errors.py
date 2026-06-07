@@ -82,6 +82,12 @@ _CSV = [
 _HISTORY = ["HB-DIR-MISSING", "HB-PLAN-DRIFT", "HB-REF-POLICY", "HB-GIT-VERSION"]
 _JOURNAL = ["JL-APPEND-ONLY", "JL-CHAIN", "JL-COVERAGE", "JL-SCHEMA", "JL-RENDER"]
 _PROPOSAL = ["PP-BUNDLE-SCHEMA", "AP-NO-APPROVAL", "AP-MANIFEST-MISMATCH", "AP-ALLOWLIST"]
+# M2 publish preconditions (exit 16). PB-NO-CANDIDATE: the candidate ref/tags are
+# missing. PB-PRIOR-UNARCHIVED: a supersede was requested but the prior published
+# snapshot could not be confirmed archived in SWH (the revised-D3 guard — no
+# un-archived clobber). PB-SNAPSHOT-MISMATCH: the archiver reported a snapshot
+# SWHID that disagrees with the locally-computed one for the prior refs.
+_PUBLISH = ["PB-NO-CANDIDATE", "PB-PRIOR-UNARCHIVED", "PB-SNAPSHOT-MISMATCH"]
 
 CODES: dict[str, CodeSpec] = {}
 for _c in _EXTRACTION:
@@ -96,6 +102,8 @@ for _c in _JOURNAL:
     CODES[_c] = _spec(_c, "JournalError", EXIT_JOURNAL)
 for _c in _PROPOSAL:
     CODES[_c] = _spec(_c, "ProposalError", EXIT_EXTRACTION if _c == "PP-BUNDLE-SCHEMA" else EXIT_REF_POLICY)
+for _c in _PUBLISH:
+    CODES[_c] = _spec(_c, "PublishError", EXIT_PUBLISH_PRECOND)
 
 # The codes the M1a inspect slice may actually emit.
 INSPECT_CODES = tuple(_EXTRACTION + _BUDGET)
@@ -150,6 +158,10 @@ class ProposalError(SwhapError):
     exit_code = EXIT_EXTRACTION
 
 
+class PublishError(SwhapError):
+    exit_code = EXIT_PUBLISH_PRECOND
+
+
 _FAMILY_CLASSES = {
     "ExtractionContractError": ExtractionContractError,
     "BudgetError": BudgetError,
@@ -157,6 +169,7 @@ _FAMILY_CLASSES = {
     "HistoryError": HistoryError,
     "JournalError": JournalError,
     "ProposalError": ProposalError,
+    "PublishError": PublishError,
 }
 
 

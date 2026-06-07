@@ -23,6 +23,7 @@ Hard rules enforced here, by construction:
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 
 from .errors import HistoryError
@@ -32,6 +33,13 @@ _ALLOWED_REF_PREFIXES = (
     "refs/tags/candidate/",
     "refs/scratch/",
 )
+
+# The published Model-P refs the M2 publish capability holder (``swhap_core.publish``)
+# is allowed to write when constructed with ``allow_publish=True``: the orphan
+# ``SourceCode`` branch and single-segment final release tags ``refs/tags/<tag>``.
+# The default branch (``refs/heads/main``/``master``) is still never written here.
+_PUBLISH_SOURCECODE_REF = "refs/heads/SourceCode"
+_FINAL_TAG_RE = re.compile(r"^refs/tags/[^/]+$")
 
 
 def _base_env() -> dict[str, str]:
@@ -55,9 +63,11 @@ def _base_env() -> dict[str, str]:
 class GitRunner:
     """Argv-only git plumbing bound to one repository (``cwd``)."""
 
-    def __init__(self, repo: str, *, allow_scratch_only: bool = False):
+    def __init__(self, repo: str, *, allow_scratch_only: bool = False, allow_publish: bool = False):
         self.repo = os.path.abspath(repo)
         self.allow_scratch_only = allow_scratch_only
+        # M2 publish capability: also permit refs/heads/SourceCode and final tags.
+        self.allow_publish = allow_publish
 
     # --- low-level -----------------------------------------------------------
     def run(
@@ -176,12 +186,16 @@ class GitRunner:
     # --- refs (guarded) ------------------------------------------------------
     def _check_ref(self, ref: str) -> None:
         ok = ref.startswith(_ALLOWED_REF_PREFIXES)
+        if self.allow_publish:
+            ok = ok or ref == _PUBLISH_SOURCECODE_REF or bool(_FINAL_TAG_RE.match(ref))
         if self.allow_scratch_only:
             ok = ref.startswith("refs/scratch/")
         if not ok:
+            allowed = "refs/heads/candidate/**, refs/tags/candidate/**, refs/scratch/**"
+            if self.allow_publish:
+                allowed += ", refs/heads/SourceCode, refs/tags/<tag>"
             raise HistoryError(
-                f"ref-policy: builder may not write {ref!r} "
-                "(allowed: refs/heads/candidate/**, refs/tags/candidate/**, refs/scratch/**)",
+                f"ref-policy: may not write {ref!r} (allowed: {allowed})",
                 code="HB-REF-POLICY",
                 ref=ref,
             )

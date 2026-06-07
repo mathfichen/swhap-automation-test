@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "swhap-journal/1/entry",
   "title": "SWHAP journal ledger entry (swhap-journal/1)",
-  "description": "Status: DRAFT pending W1 sign-off. The single envelope for every entry of the machine-appended SWHAP journal ledger (Q11: Layer-1 journal is canonical provenance; AI annotates, never authors). Normative companion: specs/journal-schema.md. Canonical storage is metadata/journal.jsonl, one canonically-serialized entry per line; metadata/journal.md is a derived view. Entries MUST NOT contain non-integer JSON numbers, and every JSON string MUST be well-formed Unicode with NO lone surrogate code points (so the mandated ensure_ascii=False UTF-8 serialization is total; canonical-serialization rule, journal-schema.md section 3.2). Lossy-but-safe display strings (e.g. extract.details.non_utf8_names[].decoded) MUST be produced with a surrogate-free error handler; the lossless authority is the bytes_hex sibling.",
+  "description": "AMENDED 2026-06-07 (additive, schema-version unchanged: swhap-journal/1) — rewrite-event now supports the revised-D3 rebuild-and-replace supersession (decisions.md D3-RESOLVED 2026-06-06): sign-off.acknowledgement enum gains \"prior-snapshot-archived-in-swh\", details gain supersedes_snapshot_swhid (the prior history's snp SWHID), and the previously-required invalidated_swhids is retired (kept only for backward compatibility). Status: DRAFT pending W1 sign-off. The single envelope for every entry of the machine-appended SWHAP journal ledger (Q11: Layer-1 journal is canonical provenance; AI annotates, never authors). Normative companion: specs/journal-schema.md. Canonical storage is metadata/journal.jsonl, one canonically-serialized entry per line; metadata/journal.md is a derived view. Entries MUST NOT contain non-integer JSON numbers, and every JSON string MUST be well-formed Unicode with NO lone surrogate code points (so the mandated ensure_ascii=False UTF-8 serialization is total; canonical-serialization rule, journal-schema.md section 3.2). Lossy-but-safe display strings (e.g. extract.details.non_utf8_names[].decoded) MUST be produced with a surrogate-free error handler; the lossless authority is the bytes_hex sibling.",
   "type": "object",
   "required": ["schema", "id", "ts", "actor", "action", "prev_entry_sha256"],
   "additionalProperties": false,
@@ -475,7 +475,7 @@
       }
     },
     {
-      "description": "rewrite-event (D3 interim escape hatch): two-phase. sign-off = curator acknowledges SWHID invalidation BEFORE any rewrite; executed = machine records the performed rewrite, referencing the sign-off entry.",
+      "description": "rewrite-event: two-phase. AMENDMENT 2026-06-07 (D3 revised to rebuild-and-replace, decisions.md D3-RESOLVED 2026-06-06; journal-schema.md section 8): the sign-off acknowledges a SUPERSESSION (the prior published history stays permanently archived/citable in SWH), NOT an invalidation. The sign-off enum gains \"prior-snapshot-archived-in-swh\"; details gain supersedes_snapshot_swhid (the snp SWHID of the prior, archived history — the durable lineage pointer); the previously-required invalidated_swhids is RETIRED (no longer required — prior SWHIDs are preserved, not invalidated). Legacy \"swhid-invalidation-acknowledged\" sign-offs remain valid (additive, schema-version unchanged: swhap-journal/1). executed = machine records the performed rewrite, citing the sign-off entry.",
       "if": { "properties": { "action": { "const": "rewrite-event" } }, "required": ["action"] },
       "then": {
         "properties": {
@@ -486,8 +486,9 @@
               "phase": { "enum": ["sign-off", "executed"] },
               "target_refs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
               "reason": { "type": "string" },
-              "invalidated_swhids": { "type": "array", "items": { "$ref": "#/$defs/swhid" } },
-              "acknowledgement": { "const": "swhid-invalidation-acknowledged" },
+              "supersedes_snapshot_swhid": { "$ref": "#/$defs/swhid_snp", "description": "Revised D3: the snp SWHID of the prior published history this rewrite supersedes. It is archived in SWH before replacement and recorded here as the durable lineage pointer (the prior SWHIDs are preserved, not invalidated). Required on a sign-off whose acknowledgement is \"prior-snapshot-archived-in-swh\"." },
+              "invalidated_swhids": { "type": "array", "items": { "$ref": "#/$defs/swhid" }, "description": "RETIRED by the 2026-06-07 amendment (kept for backward compatibility with legacy sign-offs that used the \"swhid-invalidation-acknowledged\" framing). New sign-offs use supersedes_snapshot_swhid instead." },
+              "acknowledgement": { "enum": ["prior-snapshot-archived-in-swh", "swhid-invalidation-acknowledged"] },
               "sign_off_entry": { "$ref": "#/$defs/ulid" },
               "old_hashes": { "type": "array", "items": { "$ref": "#/$defs/git_object_id" } },
               "new_hashes": { "type": "array", "items": { "$ref": "#/$defs/git_object_id" } }
@@ -495,7 +496,23 @@
             "allOf": [
               {
                 "if": { "properties": { "phase": { "const": "sign-off" } }, "required": ["phase"] },
-                "then": { "required": ["invalidated_swhids", "acknowledgement"] }
+                "then": { "required": ["acknowledgement"] }
+              },
+              {
+                "description": "Revised-D3 supersession sign-off: the prior snapshot pointer is mandatory.",
+                "if": {
+                  "properties": { "acknowledgement": { "const": "prior-snapshot-archived-in-swh" } },
+                  "required": ["acknowledgement"]
+                },
+                "then": { "required": ["supersedes_snapshot_swhid"] }
+              },
+              {
+                "description": "Legacy invalidation sign-off: the retired field is still required when the legacy acknowledgement is used.",
+                "if": {
+                  "properties": { "acknowledgement": { "const": "swhid-invalidation-acknowledged" } },
+                  "required": ["acknowledgement"]
+                },
+                "then": { "required": ["invalidated_swhids"] }
               },
               {
                 "if": { "properties": { "phase": { "const": "executed" } }, "required": ["phase"] },
@@ -534,6 +551,11 @@
     "swhid": {
       "type": "string",
       "pattern": "^swh:1:(snp|rel|rev|dir|cnt):[0-9a-f]{40}$"
+    },
+    "swhid_snp": {
+      "type": "string",
+      "pattern": "^swh:1:snp:[0-9a-f]{40}$",
+      "description": "A snapshot SWHID specifically (revised-D3 supersedes_snapshot_swhid)."
     },
     "ulid": {
       "type": "string",
