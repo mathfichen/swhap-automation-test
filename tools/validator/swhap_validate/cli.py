@@ -13,8 +13,8 @@ from . import manifest as _manifest
 from . import profiles
 from .context import RepoContext
 from .report import EXIT_INTERNAL, EXIT_USAGE, Report
-from .checks import (branch_purity, codemeta, csv_contract, journal, pii,
-                     preflight, size_lfs, tree_fidelity)
+from .checks import (branch_purity, codemeta, csv_contract, divergence,
+                     journal, pii, preflight, size_lfs, tree_fidelity)
 
 
 def _now_iso():
@@ -150,6 +150,22 @@ def run_validation(workdir, profile, gate, *, manifests=None,
     if enabled("JC-1a"):
         journal.run(report, ctx, journal_bytes=journal_bytes,
                     release_tags=release_tags)
+
+    # ---- DV (published-remote divergence) — gate publish only ----------
+    # Revised-D3: refuse an un-journaled/un-archived clobber of the published
+    # history; a recorded SWH-backed supersession is allowed (explained WARN).
+    # Skipped in legacy (profile matrix); only meaningful at --gate publish with
+    # a remote to compare against.
+    if enabled("DV-1"):
+        if gate != "publish":
+            report.skip("DV-1",
+                        "published-remote divergence is checked only at --gate publish")
+        elif not published_remote:
+            report.skip("DV-1",
+                        "no --published-remote provided; nothing to compare against")
+        else:
+            divergence.run(report, ctx, published_remote=published_remote,
+                           journal_bytes=journal_bytes)
 
     return _finalize(report, profile)
 

@@ -422,7 +422,7 @@ and all named red/green tests reference these IDs.
 | CM | CM-1..4 | codemeta as-SWH-consumes-it (C2/D9) | CM-1..3 FAIL; CM-4 term audit WARN, funder-vs-funding INFO |
 | SZ | SZ-1..5 | size/LFS ladder (crit-M7/N1) | SZ-1/2 FAIL; SZ-3/4 WARN; SZ-5 INFO |
 | RB | RB-1 | D4 rebuild-into-scratch-and-compare | FAIL |
-| DV | DV-1 | published-remote divergence: refuse *un-journaled, un-archived* divergence (D3 revised 2026-06-06 — a rebuild-and-replace recorded by a `rewrite-event` sign-off with the prior snapshot archived in SWH is ALLOWED; only an accidental/unrecorded clobber FAILs). Lands with the M2 publish step. | FAIL |
+| DV | DV-1 | published-remote divergence: refuse *un-journaled, un-archived* divergence (D3 revised 2026-06-06 — a rebuild-and-replace recorded by a `rewrite-event` sign-off with the prior snapshot archived in SWH is ALLOWED; only an accidental/unrecorded clobber FAILs). Implemented 2026-06-07 (M2): enforced at `--gate publish` against `--published-remote` (fast-forward ⇒ PASS; a recorded supersession whose `supersedes_snapshot_swhid` equals the recomputed prior published snapshot ⇒ explained WARN; otherwise FAIL); skipped at `--gate build` and in the legacy profile. | FAIL |
 | JC | JC-1 (M1a staged form JC-1a), JC-2 | journal/ledger coverage (Q11, crit-M4/M11) | FAIL |
 | LG | LG-1 | legal go/no-go gate (crit-M10/Q10) | FAIL at `--gate publish`; WARN at `--gate build` |
 | PI | PI-1 | personal-email lint (crit-M15) | WARN (Roberto's W1 ruling 2026-06-05, overriding the drafter's FAIL); a journaled curator-email opt-in clears the finding entirely. Redaction still applies — the literal address is never reproduced in the report regardless of severity. |
