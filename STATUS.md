@@ -2,6 +2,35 @@
 
 Milestone tracking against `swhap-automation/analysis/implementation-plan.md`.
 
+## M2 — in progress (2026-06-07)
+
+**Publish step + revised-D3 rebuild-and-replace — DONE** (in `main`; 346 tests,
+clean clone). The chronological-insertion model Roberto described is now real and
+proven:
+
+- `swhap publish` promotes a validated candidate to the published layout and
+  moves `codemeta.json` to the repo root (without that, Software Heritage indexes
+  zero metadata).
+- **Rebuild-and-replace** (`--supersede`): when a release surfaces that belongs
+  mid-history, the current history is archived to SWH, its snapshot identifier
+  (`swh:1:snp:…`, computed locally and equal to what SWH assigns) is recorded as
+  durable lineage, the full history is rebuilt with the new release in place, and
+  the branch is replaced. Proven: releases *before* the insertion keep their
+  identifiers, releases *after* change, every unchanged file/directory identifier
+  is preserved, and the rebuild is bit-identical.
+- The divergence check **DV-1** allows a fast-forward append and a *recorded*
+  SWH-backed supersession (visible, not silent), but blocks an unrecorded
+  clobber or a forged lineage pointer.
+- **Decision D3 is now IMPLEMENTED**, not just recorded intent.
+
+The one external boundary — the real push to a forge and the live Save-Code-Now
+call — is a thin mockable adapter; it needs the operator/namespace decision (D6)
+and live-API verification before production.
+
+**Still ahead in M2:** the forge-issue intake surface for non-experts (D5), the
+curator workflow + legal go/no-go gate, and the usability test (C5) — these need
+Roberto's offline-brief items (testers, namespace/operator, DEC licence).
+
 ## M1 — COMPLETE (2026-06-06)
 
 The whole first milestone is closed with no open gaps. From a **clean clone**:
