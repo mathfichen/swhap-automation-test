@@ -1,0 +1,44 @@
+{
+  "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+  "@type": "SoftwareSourceCode",
+  "name": "Wild_LIFE",
+  "description": "Wild_LIFE: an interpreter for the LIFE language (Logic, Inheritance, Functions, Equations).",
+  "funder": {
+    "@type": "Organization",
+    "name": "Digital Equipment Corporation Paris Research Laboratory (DEC PRL)"
+  },
+  "author": [
+    {
+      "@type": "Person",
+      "givenName": "Peter",
+      "familyName": "Van Roy"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Richard",
+      "familyName": "Meyer"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Jean-Claude",
+      "familyName": "Hervé"
+    }
+  ],
+  "contributor": [
+    {
+      "@type": "Person",
+      "givenName": "Hassan",
+      "familyName": "Aït-Kaci"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Seth Copen",
+      "familyName": "Goldstein"
+    },
+    {
+      "@type": "Person",
+      "givenName": "Abder",
+      "familyName": "Aggoun"
+    }
+  ]
+}

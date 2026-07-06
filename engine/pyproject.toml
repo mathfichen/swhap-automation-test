@@ -1,0 +1,20 @@
+# Top-level aggregator config so a single `pytest` run from the repo root
+# discovers all W2 suites (fixtures, swhap-core inspect, validator). The
+# individual packages are installed editable for imports:
+#   pip install -e swhap-core -e tools/validator
+# This file carries pytest configuration ONLY; it is not a buildable package.
+[tool.pytest.ini_options]
+# importlib mode keeps the three suites' modules isolated (no basename/sys.path
+# clashes) without requiring __init__.py in the test trees.
+addopts = "--import-mode=importlib"
+# The fixtures suite uses `import conftest` to reach module-level helpers
+# (WILD/NEG paths, load_build/load_mk_manifest). importlib mode isolates the
+# three same-named conftest plugins; pythonpath makes that explicit helper
+# import resolve to fixtures/tests/conftest.py specifically.
+pythonpath = ["fixtures/tests"]
+testpaths = [
+    "fixtures/tests",
+    "swhap-core/tests",
+    "tools/validator/tests",
+    "pilot/wildlife/regen",
+]

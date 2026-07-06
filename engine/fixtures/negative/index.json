@@ -1,0 +1,156 @@
+{
+  "description": "Deterministic crit-M6/crit-M3 archive fixture corpus. Each fixture isolates one property; REJECT fixtures must be refused with the named error code, ACCEPT fixtures must be handled without losing bytes.",
+  "fixtures": [
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "EX-TRAVERSAL",
+      "file": "neg-traversal-dotdot.tar",
+      "isolates": "path traversal via a '..' component",
+      "name": "neg-traversal-dotdot",
+      "note": "member path '../evil.txt' would write outside the extraction root",
+      "sha256": "3bed4251657f99208a8a95ede0cbad61ab6866cf0822717e7a74b965809fc414"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "EX-ABS",
+      "file": "neg-absolute-path.tar",
+      "isolates": "absolute member path",
+      "name": "neg-absolute-path",
+      "note": "member path '/etc/evil.txt' is absolute",
+      "sha256": "a1d5f37a75f82e8e1f38a0ddbbd5b06b60d118d5fb769093e20f8cb7d377ad15"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "EX-SYMLINK-ESCAPE",
+      "file": "neg-symlink-escape.tar",
+      "isolates": "symlink with absolute target escaping the root",
+      "name": "neg-symlink-escape",
+      "note": "symlink 'pwn' -> '/etc/passwd'",
+      "sha256": "35bc6cfdd350cac585091c3f7b06a0270e49d4858bcbf5da0d26949ee6344746"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "EX-SYMLINK-ESCAPE",
+      "file": "neg-symlink-rel-escape.tar",
+      "isolates": "symlink whose relative target escapes the root",
+      "name": "neg-symlink-rel-escape",
+      "note": "symlink 'pwn' -> '../../../../etc/passwd'",
+      "sha256": "32772ad7570d0c505dd3222d7acef33da3d0a908fb59f67635c5bb435eb85ea6"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "EX-HARDLINK-OUT",
+      "file": "neg-hardlink-outside.tar",
+      "isolates": "hardlink whose target is outside the member set",
+      "name": "neg-hardlink-outside",
+      "note": "hardlink 'hl' -> 'outside/secret' (not an archive member)",
+      "sha256": "8bcd8451080d920312eb8063f6b91832529c32757b021a3c920fa997b6029493"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "EX-DEVICE",
+      "file": "neg-device-fifo.tar",
+      "isolates": "device / special (FIFO) member",
+      "name": "neg-device-fifo",
+      "note": "FIFO member 'dev/whoops'",
+      "sha256": "33b367347b9fb7a40a1493ddbb170187ea690b08e9e763619719a615215fd444"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "EX-DUP",
+      "file": "neg-duplicate-member.tar",
+      "isolates": "duplicate member path with differing content",
+      "name": "neg-duplicate-member",
+      "note": "'dup.txt' appears twice (content 'A' then 'B')",
+      "sha256": "bfd448015da8438927b84c25624dc2f9fc8516c9bd3d5eb582b639aaff7ec14e"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "EX-CASE-COLLISION",
+      "file": "neg-case-collision.tar",
+      "isolates": "casefold-equal distinct paths",
+      "name": "neg-case-collision",
+      "note": "'README' and 'readme' collide on a case-insensitive filesystem",
+      "sha256": "4c8af3f555cc0dd2df086d572d98cbf8506a4d582772085f0b4911788e574554"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "ACCEPT",
+      "expected_code": "(byte-preserved)",
+      "file": "neg-non-utf8-name.tar",
+      "isolates": "non-UTF-8 filename bytes",
+      "name": "neg-non-utf8-name",
+      "note": "member name b'caf\\xe9.txt' (latin-1); bytes reach the git tree unchanged, encoding recorded in the journal (core §4.1.4)",
+      "sha256": "7d1e2914f8718fa4150ea84cf0e5e1d4b1bc7f5775e958c2d49515094b40c9c9"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "REJECT",
+      "expected_code": "BG-RATIO",
+      "file": "neg-bomb-ratio.tgz",
+      "isolates": "decompression-bomb compression ratio",
+      "name": "neg-bomb-ratio",
+      "note": "16 MiB of zeros compresses past the 1:200 ratio budget; only the ratio trips",
+      "sha256": "67963d621767913f5bb851c3e65a2716dcbfe0a0d09e801d8f3fba0b4da5b00c"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "ACCEPT",
+      "expected_code": "(byte-preserved)",
+      "file": "pos-bom-crlf.tar",
+      "isolates": "BOM + CRLF text byte-preservation",
+      "name": "pos-bom-crlf",
+      "note": "UTF-8 BOM and CRLF line endings must survive verbatim",
+      "sha256": "17785abb4d2e9ceb521d6ec0fe9732f022665dae58c1fa4b766dfdb39238a0db"
+    },
+    {
+      "crit": "crit-M3",
+      "disposition": "ACCEPT",
+      "expected_code": "(preserved)",
+      "file": "pos-dotfile-root.tar",
+      "isolates": "dotfile at archive root",
+      "name": "pos-dotfile-root",
+      "note": "'.hidden' at root must not be dropped (dt2sg glob-loss class)",
+      "sha256": "c3a02fe8296dcd91c006ef0430384d14a855267ba84eaefe70ce8d183eca8511"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "ACCEPT",
+      "expected_code": "(wrapper-stripped)",
+      "file": "pos-wrapper-dir.tar",
+      "isolates": "single artificial wrapper directory",
+      "name": "pos-wrapper-dir",
+      "note": "'Wrapper/' is stripped; 'main.c'/'README' surface at the root",
+      "sha256": "9ef8dcbd481c142400284d24ceb3dca99883ea8de23734181287b3de90523ca8"
+    },
+    {
+      "crit": "crit-M6",
+      "disposition": "ACCEPT",
+      "expected_code": "(.emptydir)",
+      "file": "pos-emptydir.tar",
+      "isolates": "empty directory needing a .emptydir marker",
+      "name": "pos-emptydir",
+      "note": "'empty/' has no children; preserved via a .emptydir marker",
+      "sha256": "00547c27cd812e65975929181d5994e11c7c0bd2e797bfb8754bc4c0f0758b7c"
+    },
+    {
+      "crit": "crit-M3",
+      "disposition": "ACCEPT",
+      "expected_code": "(negative epoch)",
+      "file": "pos-pre1970-mtime.tar",
+      "isolates": "pre-1970 (negative-epoch) mtime",
+      "name": "pos-pre1970-mtime",
+      "note": "member mtime 1968-01-01; must build via raw @<epoch> author date",
+      "sha256": "16064b1f93918189a0f2a9d23f8581aea872488da99bd331a04ed16aedd107d0"
+    }
+  ],
+  "schema": "swhap-negative-corpus/1"
+}

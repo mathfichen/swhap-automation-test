@@ -1,0 +1,22 @@
+{
+  "_comment": "Vendored CodeMeta 2.0 JSON-LD context (compact form sufficient for headless pyld expand/compact, network forbidden). Maps to schema.org via @vocab plus the codemeta-namespaced terms. Served locally to pyld by the offline document loader; NEVER fetched.",
+  "@context": {
+    "@vocab": "http://schema.org/",
+    "type": "@type",
+    "id": "@id",
+    "schema": "http://schema.org/",
+    "codemeta": "https://codemeta.github.io/terms/",
+    "maintainer": {"@id": "codemeta:maintainer"},
+    "funding": {"@id": "schema:funding"},
+    "funder": {"@id": "schema:funder"},
+    "referencePublication": {"@id": "codemeta:referencePublication"},
+    "developmentStatus": {"@id": "codemeta:developmentStatus"},
+    "issueTracker": {"@id": "codemeta:issueTracker"},
+    "readme": {"@id": "codemeta:readme"},
+    "buildInstructions": {"@id": "codemeta:buildInstructions"},
+    "contIntegration": {"@id": "codemeta:contIntegration"},
+    "softwareRequirements": {"@id": "schema:softwareRequirements"},
+    "softwareSuggestions": {"@id": "codemeta:softwareSuggestions"},
+    "relatedLink": {"@id": "schema:relatedLink"}
+  }
+}

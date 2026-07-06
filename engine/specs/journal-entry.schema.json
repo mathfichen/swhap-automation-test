@@ -1,0 +1,650 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "swhap-journal/1/entry",
+  "title": "SWHAP journal ledger entry (swhap-journal/1)",
+  "description": "AMENDED 2026-06-07 (additive, schema-version unchanged: swhap-journal/1) — rewrite-event now supports the revised-D3 rebuild-and-replace supersession (decisions.md D3-RESOLVED 2026-06-06): sign-off.acknowledgement enum gains \"prior-snapshot-archived-in-swh\", details gain supersedes_snapshot_swhid (the prior history's snp SWHID), and the previously-required invalidated_swhids is retired (kept only for backward compatibility). Status: FROZEN (W1 sign-off 2026-06-05); this additive amendment ratified 2026-06-07 under Roberto's D3-RESOLVED ruling (rebuild-and-replace), recorded in analysis/decisions.md. The single envelope for every entry of the machine-appended SWHAP journal ledger (Q11: Layer-1 journal is canonical provenance; AI annotates, never authors). Normative companion: specs/journal-schema.md. Canonical storage is metadata/journal.jsonl, one canonically-serialized entry per line; metadata/journal.md is a derived view. Entries MUST NOT contain non-integer JSON numbers, and every JSON string MUST be well-formed Unicode with NO lone surrogate code points (so the mandated ensure_ascii=False UTF-8 serialization is total; canonical-serialization rule, journal-schema.md section 3.2). Lossy-but-safe display strings (e.g. extract.details.non_utf8_names[].decoded) MUST be produced with a surrogate-free error handler; the lossless authority is the bytes_hex sibling.",
+  "type": "object",
+  "required": ["schema", "id", "ts", "actor", "action", "prev_entry_sha256"],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "swhap-journal/1"
+    },
+    "id": {
+      "$ref": "#/$defs/ulid",
+      "description": "ULID, unique within the ledger. Uniqueness violation = JL-CHAIN FAIL; non-monotonicity = WARN (chain order is the authoritative order, journal-schema.md section 5.4)."
+    },
+    "ts": {
+      "$ref": "#/$defs/timestamp",
+      "description": "Wall-clock event time, UTC, RFC 3339, second precision, 'Z' suffix. Never flows into git objects (D4 separation, journal-schema.md section 4)."
+    },
+    "actor": {
+      "$ref": "#/$defs/actor"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "genesis",
+        "acquire",
+        "inspect",
+        "extract",
+        "strip-wrapper",
+        "emptydir",
+        "digest",
+        "csv-validate",
+        "csv-convert",
+        "curation-timestamp",
+        "plan",
+        "apply",
+        "apply-proposal",
+        "validate",
+        "state-transition",
+        "provenance-transition",
+        "escalation",
+        "review-session",
+        "ai-consent",
+        "annotation",
+        "publish-event",
+        "rewrite-event"
+      ]
+    },
+    "inputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/input_item" },
+      "description": "Every file or fetched material the action consumed, each with its sha256."
+    },
+    "outputs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/output_item" },
+      "description": "Files written, git objects/refs created, SWHIDs recorded. Git refs here MUST be under candidate/published/SourceCode namespaces (allowlist regex on output_item.ref), never the workbench default branch (self-reference rule, journal-schema.md section 9) and never refs/scratch/**. Beyond the ref regex, verify step 9 (journal-schema.md section 5.4) additionally rejects any outputs[].git_object that is a commit reachable on the workbench default branch."
+    },
+    "provenance_transitions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/provenance_transition" }
+    },
+    "prev_entry_sha256": {
+      "$ref": "#/$defs/sha256",
+      "description": "sha256 (lowercase hex) of the canonical line bytes of the immediately preceding ledger entry; 64 zeros for the genesis entry."
+    },
+    "details": {
+      "type": "object",
+      "description": "Action-specific payload. Required keys per action are enforced by the allOf clauses below; additional keys are permitted (payload owners: intake-curator for provenance-transition/escalation/publish-event/review-session, ai-layer for ai-consent, swhap-core for the rest)."
+    }
+  },
+  "allOf": [
+    {
+      "description": "Anti-forgery (crit-M11 'AI-annotation forgery of a human actor'): the forge identity fields login/role/verified_via are curator-only. An actor whose kind is ai or machine MUST NOT carry any of them, so no consumer keying attribution on actor.login/actor.role can ever attribute AI- or machine-authored text to a named curator.",
+      "if": {
+        "properties": { "actor": { "properties": { "kind": { "enum": ["ai", "machine"] } }, "required": ["kind"] } },
+        "required": ["actor"]
+      },
+      "then": {
+        "properties": {
+          "actor": {
+            "properties": {
+              "login": false,
+              "role": false,
+              "verified_via": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "description": "Q11 hard rule: AI actors may only annotate. They never author pipeline entries, never transition provenance states.",
+      "if": {
+        "properties": { "actor": { "properties": { "kind": { "const": "ai" } }, "required": ["kind"] } },
+        "required": ["actor"]
+      },
+      "then": {
+        "properties": {
+          "action": { "const": "annotation" },
+          "provenance_transitions": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "description": "annotation entries are AI-only (curators speak through their own action values).",
+      "if": { "properties": { "action": { "const": "annotation" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "ai" } }, "required": ["kind"] },
+          "details": {
+            "type": "object",
+            "required": ["note"],
+            "properties": {
+              "note": { "type": "string" },
+              "target_entry": { "$ref": "#/$defs/ulid" },
+              "target_item": { "type": "string" }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "Genesis entry: zero prev hash, machine actor, names the workbench.",
+      "if": { "properties": { "action": { "const": "genesis" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "prev_entry_sha256": { "const": "0000000000000000000000000000000000000000000000000000000000000000" },
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "details": {
+            "type": "object",
+            "required": ["workbench"],
+            "properties": {
+              "workbench": { "type": "string" },
+              "recovered_from": {
+                "type": "object",
+                "required": ["path", "sha256", "superseded_tip_sha256"],
+                "description": "Present iff this genesis starts a recovery lineage (journal-schema.md section 5.1). Grants the verifiable per-lineage exemption to the section-5.4 step-5 append-only prefix check; superseded_tip_sha256 is the entry-hash of the last published entry of the damaged ledger, proving the discontinuity.",
+                "properties": {
+                  "path": { "type": "string" },
+                  "sha256": { "$ref": "#/$defs/sha256" },
+                  "superseded_tip_sha256": { "$ref": "#/$defs/sha256" }
+                }
+              }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "provenance-transition entries carry at least one transition.",
+      "if": { "properties": { "action": { "const": "provenance-transition" } }, "required": ["action"] },
+      "then": {
+        "properties": { "provenance_transitions": { "minItems": 1 } },
+        "required": ["provenance_transitions"]
+      }
+    },
+    {
+      "description": "crit-M11 / LG-1: only a curator-kind actor may transition any item to curator-approved.",
+      "if": {
+        "properties": {
+          "provenance_transitions": {
+            "contains": {
+              "properties": { "to": { "const": "curator-approved" } },
+              "required": ["to"]
+            }
+          }
+        },
+        "required": ["provenance_transitions"]
+      },
+      "then": {
+        "properties": { "actor": { "properties": { "kind": { "const": "curator" } }, "required": ["kind"] } }
+      }
+    },
+    {
+      "description": "ai-consent payload (ai-layer section 4): appended by Layer 1 on explicit user/curator action.",
+      "if": { "properties": { "action": { "const": "ai-consent" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "curator" } }, "required": ["kind"] },
+          "details": {
+            "type": "object",
+            "required": ["provider", "endpoint", "data_classes", "retention_ref"],
+            "properties": {
+              "provider": { "type": "string" },
+              "endpoint": { "type": "string" },
+              "data_classes": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+              "retention_ref": { "type": "string" }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "review-session brackets (intake-curator section 4.3; C5 active-time metric source).",
+      "if": { "properties": { "action": { "const": "review-session" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "details": {
+            "type": "object",
+            "required": ["phase", "ref"],
+            "properties": {
+              "phase": { "enum": ["start", "end"] },
+              "ref": { "type": "string" }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "escalation payload (intake-curator section 4.3).",
+      "if": { "properties": { "action": { "const": "escalation" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "details": {
+            "type": "object",
+            "required": ["item", "reason"],
+            "properties": {
+              "item": { "type": "string" },
+              "reason": { "type": "string" },
+              "source_question": { "type": "string" },
+              "contact": { "type": ["string", "null"] },
+              "task_url": { "type": "string" }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "publish-event payload (intake-curator section 4.3); re-runnable on partial failure, so swhids/save_code_now are optional — no recorded SWHID means no archived state.",
+      "if": { "properties": { "action": { "const": "publish-event" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "details": {
+            "type": "object",
+            "required": ["candidate_ref", "final_repo"],
+            "properties": {
+              "candidate_ref": { "type": "string" },
+              "final_repo": { "type": "string" },
+              "swhids": {
+                "type": "object",
+                "properties": {
+                  "snp": { "$ref": "#/$defs/swhid" },
+                  "rel": { "type": "array", "items": { "$ref": "#/$defs/swhid" } },
+                  "dir": { "type": "array", "items": { "$ref": "#/$defs/swhid" } }
+                }
+              },
+              "save_code_now": {
+                "type": "object",
+                "properties": {
+                  "request_url": { "type": "string" },
+                  "visit_status": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "state-transition: workflow/label state machines (e.g. the intake issue, intake-curator section 4.4). The labels are a view; this entry is the canonical record.",
+      "if": { "properties": { "action": { "const": "state-transition" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "details": {
+            "type": "object",
+            "required": ["machine", "from", "to"],
+            "properties": {
+              "machine": { "type": "string" },
+              "from": { "type": ["string", "null"] },
+              "to": { "type": "string" },
+              "ref": { "type": "string" }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "curation-timestamp: the CANONICAL store of the D4 fixed curation timestamp (committer/tagger date), mirrored into plan.json.",
+      "if": { "properties": { "action": { "const": "curation-timestamp" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "details": {
+            "type": "object",
+            "required": ["epoch", "offset"],
+            "properties": {
+              "epoch": { "type": "integer" },
+              "offset": { "type": "string", "pattern": "^[+-][0-9]{4}$" },
+              "acquisition": { "type": "string", "description": "Acquisition discriminator (journal-schema.md section 13). Absent ⇒ the reserved single-acquisition key. Verify step 8 allows at most one curation-timestamp per distinct value of this key, so a second legitimate acquisition (section 13) gets its own D4 timestamp without tripping JL-CHAIN." }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "acquire (swhap ingest): records what was fetched/staged. Machine actor; MUST carry inputs (the fetched material, each with sha256) and outputs (the staged raw_materials/ files). details.acquisition optionally names the acquisition for multi-acquisition workbenches (journal-schema.md section 13; verify step 8 grouping key).",
+      "if": { "properties": { "action": { "const": "acquire" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "inputs": { "minItems": 1 },
+          "outputs": { "minItems": 1 },
+          "details": { "type": "object", "properties": { "acquisition": { "type": "string" } } }
+        },
+        "required": ["inputs", "outputs"]
+      }
+    },
+    {
+      "description": "inspect: pre-extraction census/verdict. Machine actor; MUST carry inputs (the material inspected, with sha256).",
+      "if": { "properties": { "action": { "const": "inspect" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "inputs": { "minItems": 1 }
+        },
+        "required": ["inputs"]
+      }
+    },
+    {
+      "description": "extract (crit-M6): records the member/encoding/checksum evidence the crit-M4 guarantee depends on. Machine actor; MUST carry inputs (the archive, with sha256) and a details object. Each non-UTF-8 member name, when present, MUST carry bytes_hex (the lossless authority), declared_encoding and a surrogate-free decoded display string (journal-schema.md section 3.2 / core section 4.1.4).",
+      "if": { "properties": { "action": { "const": "extract" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "inputs": { "minItems": 1 },
+          "details": {
+            "type": "object",
+            "properties": {
+              "non_utf8_names": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["bytes_hex", "declared_encoding", "decoded"],
+                  "properties": {
+                    "bytes_hex": { "type": "string", "pattern": "^([0-9a-fA-F]{2})+$", "description": "Lowercase/uppercase hex of the raw member-name bytes; the lossless, serialization-safe authority for the member's identity." },
+                    "declared_encoding": { "type": "string" },
+                    "decoded": { "type": "string", "description": "Best-effort human display of bytes_hex decoded with declared_encoding using a surrogate-free error handler (errors='replace', U+FFFD) — NEVER surrogateescape, so the canonical ensure_ascii=False serialization cannot raise UnicodeEncodeError. Display only; consumers MUST use bytes_hex for identity." }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "required": ["inputs", "details"]
+      }
+    },
+    {
+      "description": "strip-wrapper: records an artificial top-level directory removed. Machine actor; details MUST name the wrapper, the rule that fired, and the evidence.",
+      "if": { "properties": { "action": { "const": "strip-wrapper" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "details": {
+            "type": "object",
+            "required": ["wrapper", "rule", "evidence"],
+            "properties": {
+              "wrapper": { "type": "string" },
+              "rule": { "type": "string" },
+              "evidence": { "type": "string" }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "emptydir: records the .emptydir marker files added (empty-directory preservation). Machine actor; details.paths lists them.",
+      "if": { "properties": { "action": { "const": "emptydir" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "details": {
+            "type": "object",
+            "required": ["paths"],
+            "properties": {
+              "paths": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "digest: records the checksum/size manifests produced. Machine actor; MUST carry outputs (checksums.sha256, filesizes.csv, each as a file record with sha256).",
+      "if": { "properties": { "action": { "const": "digest" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "outputs": { "minItems": 1 }
+        },
+        "required": ["outputs"]
+      }
+    },
+    {
+      "description": "csv-validate: records a version_history.csv validation. Machine actor; MUST carry inputs (the CSV validated, with sha256).",
+      "if": { "properties": { "action": { "const": "csv-validate" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "inputs": { "minItems": 1 }
+        },
+        "required": ["inputs"]
+      }
+    },
+    {
+      "description": "csv-convert (D2 legacy read-only): records a legacy->canonical CSV conversion. Machine actor; MUST carry inputs (the legacy CSV) and outputs (the canonical CSV file record). Converted fields are provenance-tagged computed (D2).",
+      "if": { "properties": { "action": { "const": "csv-convert" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "inputs": { "minItems": 1 },
+          "outputs": { "minItems": 1 }
+        },
+        "required": ["inputs", "outputs"]
+      }
+    },
+    {
+      "description": "plan: records the plan.json produced. Machine actor; MUST carry outputs (plan.json file record with sha256).",
+      "if": { "properties": { "action": { "const": "plan" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "outputs": { "minItems": 1 }
+        },
+        "required": ["outputs"]
+      }
+    },
+    {
+      "description": "validate (check_swhap wrapper): records a validator run. Machine actor; MUST carry inputs (the report artifact, with sha256).",
+      "if": { "properties": { "action": { "const": "validate" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "inputs": { "minItems": 1 }
+        },
+        "required": ["inputs"]
+      }
+    },
+    {
+      "description": "apply-proposal (resolution 11 / core section 4.8): Layer 1 renders a curator-approved AI proposal bundle into the default-branch metadata/ allowlist. Machine actor; every rendered file is a section-9 file output {path,sha256} (NEVER a git object — the write lands on the default branch, which carries no coverage obligation); provenance_transitions seed the rendered items (section 7.1: inferred); details cites the proposal source and the curator approval entry that gated the apply (AP-NO-APPROVAL otherwise).",
+      "if": { "properties": { "action": { "const": "apply-proposal" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "actor": { "properties": { "kind": { "const": "machine" } }, "required": ["kind"] },
+          "outputs": { "minItems": 1, "items": { "required": ["path", "sha256"] } },
+          "provenance_transitions": { "minItems": 1 },
+          "details": {
+            "type": "object",
+            "required": ["proposal_ref", "approval_entry"],
+            "properties": {
+              "proposal_ref": { "type": "string", "description": "The refs/heads/ai/proposal/** source (and/or bundle id) the render came from." },
+              "approval_entry": { "$ref": "#/$defs/ulid", "description": "ULID of the curator entry that approved applying this proposal." }
+            }
+          }
+        },
+        "required": ["outputs", "provenance_transitions", "details"]
+      }
+    },
+    {
+      "description": "apply entries must name the git objects they created (JL-COVERAGE / JC-1 anchor).",
+      "if": { "properties": { "action": { "const": "apply" } }, "required": ["action"] },
+      "then": {
+        "properties": { "outputs": { "minItems": 1 } },
+        "required": ["outputs"]
+      }
+    },
+    {
+      "description": "rewrite-event: two-phase. AMENDMENT 2026-06-07 (D3 revised to rebuild-and-replace, decisions.md D3-RESOLVED 2026-06-06; journal-schema.md section 8): the sign-off acknowledges a SUPERSESSION (the prior published history stays permanently archived/citable in SWH), NOT an invalidation. The sign-off enum gains \"prior-snapshot-archived-in-swh\"; details gain supersedes_snapshot_swhid (the snp SWHID of the prior, archived history — the durable lineage pointer); the previously-required invalidated_swhids is RETIRED (no longer required — prior SWHIDs are preserved, not invalidated). Legacy \"swhid-invalidation-acknowledged\" sign-offs remain valid (additive, schema-version unchanged: swhap-journal/1). executed = machine records the performed rewrite, citing the sign-off entry.",
+      "if": { "properties": { "action": { "const": "rewrite-event" } }, "required": ["action"] },
+      "then": {
+        "properties": {
+          "details": {
+            "type": "object",
+            "required": ["phase", "target_refs", "reason"],
+            "properties": {
+              "phase": { "enum": ["sign-off", "executed"] },
+              "target_refs": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+              "reason": { "type": "string" },
+              "supersedes_snapshot_swhid": { "$ref": "#/$defs/swhid_snp", "description": "Revised D3: the snp SWHID of the prior published history this rewrite supersedes. It is archived in SWH before replacement and recorded here as the durable lineage pointer (the prior SWHIDs are preserved, not invalidated). Required on a sign-off whose acknowledgement is \"prior-snapshot-archived-in-swh\"." },
+              "invalidated_swhids": { "type": "array", "items": { "$ref": "#/$defs/swhid" }, "description": "RETIRED by the 2026-06-07 amendment (kept for backward compatibility with legacy sign-offs that used the \"swhid-invalidation-acknowledged\" framing). New sign-offs use supersedes_snapshot_swhid instead." },
+              "acknowledgement": { "enum": ["prior-snapshot-archived-in-swh", "swhid-invalidation-acknowledged"] },
+              "sign_off_entry": { "$ref": "#/$defs/ulid" },
+              "old_hashes": { "type": "array", "items": { "$ref": "#/$defs/git_object_id" } },
+              "new_hashes": { "type": "array", "items": { "$ref": "#/$defs/git_object_id" } }
+            },
+            "allOf": [
+              {
+                "if": { "properties": { "phase": { "const": "sign-off" } }, "required": ["phase"] },
+                "then": { "required": ["acknowledgement"] }
+              },
+              {
+                "description": "Revised-D3 supersession sign-off: the prior snapshot pointer is mandatory.",
+                "if": {
+                  "properties": { "acknowledgement": { "const": "prior-snapshot-archived-in-swh" } },
+                  "required": ["acknowledgement"]
+                },
+                "then": { "required": ["supersedes_snapshot_swhid"] }
+              },
+              {
+                "description": "Legacy invalidation sign-off: the retired field is still required when the legacy acknowledgement is used.",
+                "if": {
+                  "properties": { "acknowledgement": { "const": "swhid-invalidation-acknowledged" } },
+                  "required": ["acknowledgement"]
+                },
+                "then": { "required": ["invalidated_swhids"] }
+              },
+              {
+                "if": { "properties": { "phase": { "const": "executed" } }, "required": ["phase"] },
+                "then": { "required": ["sign_off_entry", "old_hashes", "new_hashes"] }
+              }
+            ]
+          }
+        },
+        "required": ["details"]
+      }
+    },
+    {
+      "description": "rewrite-event sign-off must come from a curator; executed from the machine.",
+      "if": {
+        "properties": {
+          "action": { "const": "rewrite-event" },
+          "details": { "properties": { "phase": { "const": "sign-off" } }, "required": ["phase"] }
+        },
+        "required": ["action", "details"]
+      },
+      "then": {
+        "properties": { "actor": { "properties": { "kind": { "const": "curator" } }, "required": ["kind"] } }
+      }
+    }
+  ],
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "git_object_id": {
+      "type": "string",
+      "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$",
+      "description": "Git object id, SHA-1 (40 hex) or SHA-256-repo (64 hex)."
+    },
+    "swhid": {
+      "type": "string",
+      "pattern": "^swh:1:(snp|rel|rev|dir|cnt):[0-9a-f]{40}$"
+    },
+    "swhid_snp": {
+      "type": "string",
+      "pattern": "^swh:1:snp:[0-9a-f]{40}$",
+      "description": "A snapshot SWHID specifically (revised-D3 supersedes_snapshot_swhid)."
+    },
+    "ulid": {
+      "type": "string",
+      "pattern": "^[0-7][0-9A-HJKMNP-TV-Z]{25}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "provenance_state": {
+      "enum": ["observed", "computed", "inferred", "user-provided", "curator-approved"]
+    },
+    "actor": {
+      "type": "object",
+      "required": ["kind", "name", "tool", "version"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": { "enum": ["machine", "curator", "ai"] },
+        "name": { "type": "string", "minLength": 1 },
+        "tool": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "login": { "type": "string", "description": "Optional forge field, curator-kind actors (intake-curator section 4.3)." },
+        "role": { "type": "string", "description": "Optional forge field, curator-kind actors." },
+        "verified_via": { "type": "string", "description": "Optional forge field: how the forge identity was verified (e.g. team-membership)." }
+      }
+    },
+    "input_item": {
+      "type": "object",
+      "required": ["sha256"],
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["path"] },
+        { "required": ["url"] }
+      ],
+      "properties": {
+        "path": { "type": "string", "description": "Path relative to the workbench root." },
+        "url": { "type": "string", "description": "Source URL for fetched materials (acquire)." },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "size_bytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "output_item": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["path", "sha256"],
+          "additionalProperties": false,
+          "properties": {
+            "path": { "type": "string" },
+            "sha256": { "$ref": "#/$defs/sha256" },
+            "size_bytes": { "type": "integer", "minimum": 0 }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["type", "git_object"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "enum": ["commit", "tag"] },
+            "git_object": { "$ref": "#/$defs/git_object_id" },
+            "ref": {
+              "type": "string",
+              "pattern": "^(refs/heads/candidate/.+|refs/tags/candidate/.+|refs/tags/[^/]+|refs/heads/SourceCode)$",
+              "description": "Curated-ref allowlist: candidate branches (refs/heads/candidate/<model>/<run-id>), candidate tags (refs/tags/candidate/...), final release tags (refs/tags/<tag>), or the published refs/heads/SourceCode. The default branch (refs/heads/main, refs/heads/master, any Model-G default head) and refs/scratch/** are structurally excluded (self-reference rule, journal-schema.md section 9). A git_object that is itself a default-branch commit is caught at verify step 9 even under an allowed ref."
+            }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["swhid"],
+          "additionalProperties": false,
+          "properties": {
+            "swhid": { "$ref": "#/$defs/swhid" }
+          }
+        }
+      ]
+    },
+    "provenance_transition": {
+      "type": "object",
+      "required": ["item", "from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "item": { "type": "string", "minLength": 1, "description": "Stable metadata/ledger item id, e.g. legal.license, codemeta.dateCreated." },
+        "from": {
+          "oneOf": [ { "$ref": "#/$defs/provenance_state" }, { "type": "null" } ],
+          "description": "null = initial state assignment (item creation)."
+        },
+        "to": { "$ref": "#/$defs/provenance_state" }
+      }
+    }
+  }
+}

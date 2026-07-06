@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swhap-core"
+version = "0.1.0"
+description = "Deterministic Layer-1 SWHAP workbench generator (M1a: read-only inspect slice)"
+requires-python = ">=3.11"
+# stdlib-only at runtime (core-pipeline.md §2). pytest is dev-only.
+dependencies = []
+
+[project.optional-dependencies]
+# The M2 publish path (swhap_core.swhid / swhap_core.publish, `swhap publish`)
+# computes snapshot SWHIDs via swh.model — the ONLY non-stdlib runtime import,
+# scoped to that path by a lazy import. Everything else stays stdlib-only.
+publish = ["swh.model[cli]"]
+test = ["pytest", "jsonschema", "swh.model[cli]"]
+
+[project.scripts]
+swhap = "swhap_core.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
