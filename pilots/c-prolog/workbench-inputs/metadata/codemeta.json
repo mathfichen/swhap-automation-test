@@ -1,0 +1,37 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "name": "C Prolog",
+    "version": "1.5",
+    "description": "C Prolog is a Prolog interpreter written in C, implementing standard Edinburgh Prolog. Based on the Prolog system written in IMP by Luis Damas for ICL 2900 computers, with contributions by Lawrence Byrd.",
+    "datePublished": "1984-02-20",
+    "programmingLanguage": "C",
+    "applicationCategory": "Programming language interpreter",
+    "keywords": [
+        "Prolog",
+        "logic programming",
+        "interpreter",
+        "Edinburgh Prolog"
+    ],
+    "author": [
+        {
+            "@type": "Person",
+            "givenName": "Fernando",
+            "familyName": "Pereira",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "EdCAAD, Department of Architecture, University of Edinburgh"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Luis",
+            "familyName": "Damas"
+        },
+        {
+            "@type": "Person",
+            "givenName": "Lawrence",
+            "familyName": "Byrd"
+        }
+    ]
+}

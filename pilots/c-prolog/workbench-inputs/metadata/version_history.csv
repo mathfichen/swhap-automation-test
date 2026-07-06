@@ -1,0 +1,2 @@
+directory name,date,author name,author email,curator name,curator email,release tag,commit message
+1.5,1984-02-20,C-Prolog authors,c-prolog-authors@noreply.example.org,Roberto Di Cosmo,roberto@dicosmo.org,v1.5,"C-Prolog 1.5 — Prolog interpreter in C (EdCAAD, University of Edinburgh; based on Luis Damas's IMP Prolog)"

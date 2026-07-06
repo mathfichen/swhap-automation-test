@@ -1,0 +1,5 @@
+# Extraction-only (D2): history authority is version_history.csv.
+trees:
+  "1.5":
+    - path: "raw_materials/1.5/c-prolog.tar.gz"
+      strip_components: "auto"

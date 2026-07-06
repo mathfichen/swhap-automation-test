@@ -1,0 +1,103 @@
+{
+  "findings": [
+    {
+      "check_id": "PI-1",
+      "enforced": true,
+      "id": "PI-1:89ad6002d401",
+      "message_plain": "Row 1 field 'curator email' contains a real personal email address; please confirm it may be published.",
+      "message_technical": "PI-1: non-placeholder addr-spec (redacted)",
+      "object": {
+        "domain_class": "private",
+        "field": "curator email",
+        "row": 1,
+        "value_hmac12": "b2a70703125b"
+      },
+      "remediation": "Use a noreply placeholder, or record a curator opt-in in the journal.",
+      "required_approver_role": "curator",
+      "severity": "WARN",
+      "state": "open"
+    }
+  ],
+  "run": {
+    "checks_run": [
+      "BP-1",
+      "BP-2",
+      "BP-3",
+      "BP-5",
+      "CM-1",
+      "CM-2",
+      "CM-3",
+      "CM-4",
+      "CSV-1",
+      "CSV-2",
+      "CSV-3",
+      "CSV-4",
+      "CSV-5",
+      "CSV-6",
+      "CSV-7",
+      "JC-1a",
+      "PC-1",
+      "PI-1",
+      "SZ-1",
+      "SZ-2",
+      "SZ-3",
+      "SZ-5"
+    ],
+    "checks_skipped": [
+      {
+        "id": "DV-1",
+        "reason": "published-remote divergence is checked only at --gate publish"
+      },
+      {
+        "id": "TF-1",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      },
+      {
+        "id": "TF-2",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      },
+      {
+        "id": "TF-3",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      },
+      {
+        "id": "TF-4",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      },
+      {
+        "id": "TF-5",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      }
+    ],
+    "gate": "build",
+    "head": "a5ac4f8b81d90fae1aa5c9317deb09787ff9e406",
+    "invocation": [
+      "swhap-validate",
+      "--profile",
+      "strict-P",
+      "--gate",
+      "build",
+      "--workdir",
+      "/tmp/claude-1000/-home-dicosmo-code-swhap-automation/b5759e68-dc02-43b8-8dc5-0602c2b9e531/scratchpad/cprolog-wb",
+      "--raw-materials",
+      "/tmp/claude-1000/-home-dicosmo-code-swhap-automation/b5759e68-dc02-43b8-8dc5-0602c2b9e531/scratchpad/cprolog-wb/raw_materials",
+      "--report",
+      "/home/dicosmo/code/swhap-automation/swhap-automation/pilots/c-prolog/report-2-strictP.json"
+    ],
+    "profile": "strict-P",
+    "repo": "/tmp/claude-1000/-home-dicosmo-code-swhap-automation/b5759e68-dc02-43b8-8dc5-0602c2b9e531/scratchpad/cprolog-wb",
+    "timestamp": "2026-07-06T17:18:45Z"
+  },
+  "schema_version": "1",
+  "summary": {
+    "exit_code": 0,
+    "fail": 0,
+    "info": 0,
+    "pass": 21,
+    "warn": 1
+  },
+  "tool": {
+    "name": "swhap-validate",
+    "version": "0.1.0"
+  }
+}
