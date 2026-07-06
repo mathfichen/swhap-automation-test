@@ -1,0 +1,189 @@
+{
+  "findings": [
+    {
+      "check_id": "BP-2",
+      "enforced": true,
+      "id": "BP-2:0c700fb47f20",
+      "message_plain": "The workbench branch contains '.github', which is not allowed on the pure workbench branch.",
+      "object": {
+        "path": ".github",
+        "ref": "refs/heads/main"
+      },
+      "required_approver_role": "curator",
+      "severity": "FAIL",
+      "state": "open"
+    },
+    {
+      "check_id": "BP-2",
+      "enforced": true,
+      "id": "BP-2:34360808fcc5",
+      "message_plain": "The SourceCode branch contains 'metadata', but it must hold only reconstructed source.",
+      "object": {
+        "path": "metadata",
+        "ref": "refs/heads/SourceCode"
+      },
+      "required_approver_role": "curator",
+      "severity": "FAIL",
+      "state": "open"
+    },
+    {
+      "check_id": "BP-2",
+      "enforced": true,
+      "id": "BP-2:6cfa50f0164b",
+      "message_plain": "The workbench branch contains 'source_code', which is not allowed on the pure workbench branch.",
+      "object": {
+        "path": "source_code",
+        "ref": "refs/heads/main"
+      },
+      "required_approver_role": "curator",
+      "severity": "FAIL",
+      "state": "open"
+    },
+    {
+      "check_id": "BP-2",
+      "enforced": true,
+      "id": "BP-2:c01272edb168",
+      "message_plain": "The workbench branch contains '.swhap', which is not allowed on the pure workbench branch.",
+      "object": {
+        "path": ".swhap",
+        "ref": "refs/heads/main"
+      },
+      "required_approver_role": "curator",
+      "severity": "FAIL",
+      "state": "open"
+    },
+    {
+      "check_id": "BP-2",
+      "enforced": true,
+      "id": "BP-2:cff0873c7825",
+      "message_plain": "The SourceCode branch contains 'raw_materials', but it must hold only reconstructed source.",
+      "object": {
+        "path": "raw_materials",
+        "ref": "refs/heads/SourceCode"
+      },
+      "required_approver_role": "curator",
+      "severity": "FAIL",
+      "state": "open"
+    },
+    {
+      "check_id": "CM-4",
+      "enforced": true,
+      "id": "CM-4:0c044d4ca46c",
+      "message_plain": "The field 'softwareRequirements' is ignored by Software Heritage and will not appear in the archived metadata.",
+      "object": {
+        "term": "softwareRequirements"
+      },
+      "remediation": "Remove 'softwareRequirements' or accept that SWH will drop it.",
+      "required_approver_role": "curator",
+      "severity": "WARN",
+      "state": "open"
+    },
+    {
+      "check_id": "CSV-1",
+      "enforced": true,
+      "id": "CSV-1:476ef81f1fcd",
+      "message_plain": "The metadata file version_history.csv is missing.",
+      "object": {
+        "path": "metadata/version_history.csv"
+      },
+      "remediation": "Add metadata/version_history.csv with the canonical header.",
+      "required_approver_role": "curator",
+      "severity": "FAIL",
+      "state": "open"
+    },
+    {
+      "check_id": "JC-1a",
+      "enforced": true,
+      "id": "JC-1a:44136fa355b3",
+      "message_plain": "The journal does not record 1 of 1 reconstructed commits/tags; every release step must be journaled.",
+      "message_technical": "JC-1a: hash-coverage gap (journal references no curated object hashes)",
+      "object": {
+        "sample": [
+          "f5eb2c1f46fe"
+        ],
+        "total": 1,
+        "uncovered_count": 1
+      },
+      "remediation": "Record each commit/tag in metadata/journal.jsonl.",
+      "required_approver_role": "curator",
+      "severity": "FAIL",
+      "state": "open"
+    }
+  ],
+  "run": {
+    "checks_run": [
+      "BP-1",
+      "BP-2",
+      "BP-3",
+      "BP-5",
+      "CM-1",
+      "CM-2",
+      "CM-3",
+      "CM-4",
+      "CSV-1",
+      "JC-1a",
+      "PC-1",
+      "PI-1",
+      "SZ-1",
+      "SZ-2",
+      "SZ-3",
+      "SZ-5"
+    ],
+    "checks_skipped": [
+      {
+        "id": "DV-1",
+        "reason": "published-remote divergence is checked only at --gate publish"
+      },
+      {
+        "id": "TF-1",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      },
+      {
+        "id": "TF-2",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      },
+      {
+        "id": "TF-3",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      },
+      {
+        "id": "TF-4",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      },
+      {
+        "id": "TF-5",
+        "reason": "--raw-materials carries no tree manifests; deriving them from archives (swhap inspect) is out of M1a scope"
+      }
+    ],
+    "gate": "build",
+    "head": "20b2f4adcd15d5b7994dd9424503d7dd280ab478",
+    "invocation": [
+      "swhap-validate",
+      "--profile",
+      "strict-P",
+      "--gate",
+      "build",
+      "--workdir",
+      "/tmp/claude-1000/-home-dicosmo-code-swhap-automation/b5759e68-dc02-43b8-8dc5-0602c2b9e531/scratchpad/cprolog-validate",
+      "--raw-materials",
+      "/tmp/claude-1000/-home-dicosmo-code-swhap-automation/b5759e68-dc02-43b8-8dc5-0602c2b9e531/scratchpad/cprolog-validate/raw_materials",
+      "--report",
+      "-"
+    ],
+    "profile": "strict-P",
+    "repo": "/tmp/claude-1000/-home-dicosmo-code-swhap-automation/b5759e68-dc02-43b8-8dc5-0602c2b9e531/scratchpad/cprolog-validate",
+    "timestamp": "2026-07-06T15:34:17Z"
+  },
+  "schema_version": "1",
+  "summary": {
+    "exit_code": 1,
+    "fail": 7,
+    "info": 0,
+    "pass": 12,
+    "warn": 1
+  },
+  "tool": {
+    "name": "swhap-validate",
+    "version": "0.1.0"
+  }
+}
