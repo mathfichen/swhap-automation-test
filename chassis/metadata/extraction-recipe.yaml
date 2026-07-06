@@ -1,0 +1,19 @@
+# extraction-recipe.yaml — EXTRACTION ONLY.
+#
+# This file says *how* each raw archive becomes a source_code/<directory name>/
+# tree. It has NO authority over history: author, date, curator, release tag and
+# commit message all live in version_history.csv (decision D2 — the single
+# authoritative manifest). Keep the two in sync by their shared key: every
+# `trees:` key here MUST match a `directory name` value in version_history.csv.
+#
+# strip_components: "auto"  -> drop a single top-level wrapper dir if present
+#                    0       -> keep as-is
+#                    N       -> drop N leading path components
+#
+# A release may draw from more than one source (e.g. an archive plus a loose
+# patch directory); list them in order.
+
+trees:
+  "0.90":
+    - path: "raw_materials/0.90/example.tar.gz"
+      strip_components: "auto"

@@ -1,0 +1,66 @@
+name: "Acquire legacy software"
+description: "Hand in old source code to be curated into an archival workbench — no git or command line needed."
+title: "[Acquisition] <project name>"
+labels: ["acquisition", "intake"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping rescue historic software! Fill in what you know — the
+        assistant drafts the rest and asks about anything uncertain. A human
+        curator reviews before anything is published. You do **not** need Git or
+        a terminal.
+  - type: input
+    id: project-name
+    attributes:
+      label: Project name
+      placeholder: "C Prolog"
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What is it?
+      description: One or two sentences — what the software does and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: authors
+    attributes:
+      label: Authors / contributors (with affiliation, if known)
+      placeholder: "Fernando Pereira (University of Edinburgh); Luis Damas; Lawrence Byrd"
+    validations:
+      required: false
+  - type: input
+    id: license
+    attributes:
+      label: License (name or a note; "unknown" is fine)
+      placeholder: "unknown / DEC non-commercial / GPL-2.0 / ..."
+    validations:
+      required: false
+  - type: textarea
+    id: releases
+    attributes:
+      label: Releases you have (version + approximate date, one per line)
+      placeholder: |
+        0.90  around 1993
+        1.0   March 1994
+      description: Approximate or year-only dates are fine — mark anything you are unsure of.
+    validations:
+      required: false
+  - type: textarea
+    id: sources
+    attributes:
+      label: Where are the files?
+      description: >
+        Attach the archives here if they are small (drag-and-drop). For large or
+        externally-hosted archives, paste the URLs instead.
+    validations:
+      required: false
+  - type: checkboxes
+    id: acknowledgements
+    attributes:
+      label: Before you submit
+      options:
+        - label: "I understand a curator will review licensing and attribution before anything is archived."
+          required: true

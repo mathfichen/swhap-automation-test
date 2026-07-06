@@ -1,0 +1,35 @@
+name: Archive on Software Heritage (optional, post-publish)
+
+# Kept minimal and MANUAL: automatic final SWH ingestion is out of MVP scope
+# (D7). Run this only AFTER a green build-and-publish. Unchanged in spirit from
+# the template, but it must not be wired into the build path.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: "Origin URL to save (default: this repo)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  swh-save:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save Code Now
+        env:
+          URL: ${{ inputs.target_url || format('https://github.com/{0}', github.repository) }}
+          SWH_TOKEN: ${{ secrets.SWH_PERSONAL_TOKEN }}
+        run: |
+          # TODO(confirm endpoint against SWH API docs): the documented Save Code
+          # Now form is  POST /api/1/origin/save/<visit_type>/url/<origin_url>/
+          # The template used POST /api/1/save/ with -F url=... — verify which is
+          # live before relying on this. Prefer routing through the toolkit's own
+          # publish --save-code-now adapter (same code path, already tested).
+          curl -sS -X POST \
+            "https://archive.softwareheritage.org/api/1/origin/save/git/url/${URL}/" \
+            -H "Authorization: Bearer ${SWH_TOKEN}"
+          echo "Requested archive for ${URL}"

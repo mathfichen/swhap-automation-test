@@ -1,0 +1,65 @@
+name: Validate PR (inspect + dry-run build + compliance gate)
+
+# Replaces the template's "Validate & Dry-run": adds the real compliance gate.
+# A red validator report FAILS the check — the generator is never rubber-stamped.
+
+on:
+  pull_request:
+    paths:
+      - "raw_materials/**"
+      - "metadata/version_history.csv"
+      - "metadata/extraction-recipe.yaml"   # extraction-only; NOT the history authority
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Install extraction tools + toolkit
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools p7zip-full ncompress
+          python3 -m pip install --upgrade pip
+          # Engine lives in the SoftwareHeritage/swhap-automation monorepo under
+          # engine/. A consumer template pins it by git ref (or PyPI once published):
+          pip install "swhap-core @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/swhap-core"
+          pip install "swhap-validate @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/tools/validator"
+
+      - name: Inspect uploaded archives (read-only rejection rules)
+        run: |
+          shopt -s nullglob
+          swhap inspect raw_materials/**/* --json | tee inspect.json
+
+      - name: Extract raw_materials -> source_code (strip + .emptydir)
+        run: |
+          # TODO(confirm, README Q1): prefer `swhap extract` if the toolkit owns
+          # extraction; until then this is the template's validated extractor.
+          python3 scripts/extract_any.py --recipe metadata/extraction-recipe.yaml
+
+      - name: Dry-run build (plan only — touches NO refs)
+        run: |
+          EPOCH="$(cat metadata/curation-epoch)"   # README Q2: committed fixed D4 timestamp
+          swhap build --workbench . --model P --plan \
+            --curation-epoch "$EPOCH" \
+            --plan-file plan.json --json | tee build-plan.json
+
+      - name: Compliance gate (TF / BP / CSV / CM / SZ / PI) — RED FAILS
+        run: |
+          ./check_swhap.sh --workbench . --json | tee validator-report.json
+
+      - name: Upload plan + validator report for reviewers
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swhap-validation
+          path: |
+            inspect.json
+            plan.json
+            build-plan.json
+            validator-report.json

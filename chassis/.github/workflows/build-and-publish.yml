@@ -1,0 +1,70 @@
+name: Build SourceCode + publish (bit-reproducible, DV-1-safe)
+
+# Replaces the template's "Regenerate SourceCode" (which force-pushed with no
+# tags and no lineage). Here: build to a CANDIDATE ref, re-validate the
+# candidate, then publish through `swhap publish` — which enforces DV-1 and the
+# revised-D3 supersede flow. There is NO `git push -f` anywhere.
+
+on:
+  workflow_dispatch:
+    inputs:
+      supersede:
+        description: "Rewrite an already-published history (revised-D3 rebuild-and-replace)?"
+        type: boolean
+        default: false
+      reason:
+        description: "Rewrite reason (required when superseding — sign-off text)"
+        type: string
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Install extraction tools + toolkit
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libarchive-tools p7zip-full ncompress
+          python3 -m pip install --upgrade pip
+          pip install "swhap-core @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/swhap-core"
+          pip install "swhap-validate @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/tools/validator"
+
+      - name: Extract raw_materials -> source_code
+        run: python3 scripts/extract_any.py --recipe metadata/extraction-recipe.yaml
+
+      - name: Build history to a candidate ref (bit-reproducible, D4; tags created)
+        id: build
+        run: |
+          EPOCH="$(cat metadata/curation-epoch)"
+          swhap build --workbench . --model P --apply \
+            --curation-epoch "$EPOCH" \
+            --json | tee apply.json
+          # candidate ref = refs/heads/candidate/P/<run-id>; capture from apply.json
+          echo "candidate_ref=$(jq -r '.candidate_ref' apply.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Re-validate the candidate — RED FAILS, nothing publishes
+        run: ./check_swhap.sh --workbench . --candidate-ref "${{ steps.build.outputs.candidate_ref }}" --json
+
+      - name: Publish (DV-1 divergence guard + supersede lineage)
+        env:
+          SWH_TOKEN: ${{ secrets.SWH_PERSONAL_TOKEN }}
+        run: |
+          EXTRA=()
+          if [ "${{ inputs.supersede }}" = "true" ]; then
+            [ -n "${{ inputs.reason }}" ] || { echo "supersede needs --reason"; exit 2; }
+            EXTRA+=(--supersede --reason "${{ inputs.reason }}")
+          fi
+          swhap publish --workbench . \
+            --candidate-ref "${{ steps.build.outputs.candidate_ref }}" \
+            --final-repo "https://github.com/${{ github.repository }}" \
+            --remote "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" \
+            --curator-login "${{ github.actor }}" \
+            "${EXTRA[@]}" --json
+          # Save Code Now is deliberately NOT triggered here (D7 — out of MVP);
+          # run archive-swh.yml explicitly after a green publish if desired.
