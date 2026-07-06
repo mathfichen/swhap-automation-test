@@ -71,6 +71,55 @@ only as a read-only legacy/audit profile.
   guard against path traversal, preserve (don't follow) symlinks, never execute
   extracted code by default.
 
+## Provisioning & the intake front door (decision D11)
+
+Acquisitions do **not** happen in this development-hub repo, and a contributor
+never creates a repo or opens a pull request. The flow:
+
+```
+[standing intake repo]  ──issue (the form)──►  [provisioning gate]  ──►  [per-acquisition workbench]
+  swhap-workbenches/          contributor's           curator-click now,        org-owned, one per acquisition,
+  swhap-intake                whole job ends here      GitHub App later          uploads land on the ISSUE
+  (the ONE front door)                                 (minted token, no server)  not on a PR / not repo write
+                                                                                 │
+                                                                    curator-gated publish → Save Code Now → SWHID
+```
+
+- **Front door = a standing intake repo**, not this repo and not the per-acquisition
+  workbench (the workbench doesn't exist yet when the contributor arrives). It
+  holds the typed intake issue-form; see [`../intake`](../intake) for the scaffold.
+- **Uploads land on the intake issue**, never as a contributor push/PR. This is
+  both a UX choice (no PR jargon) and a security requirement — see C3 below.
+- **Provisioning** creates the workbench **org-owned** in `swhap-workbenches`
+  (SWH instance zero; each institution self-hosts its own org under D6). An
+  external non-member cannot create a repo in an org, so self-service is not the
+  outsider path — provisioning is.
+- **Publish is curator-gated** and holds the only SWH credential.
+
+## Security invariants for untrusted input
+
+Uploaded archives are arbitrary old code; extract/build **runs untrusted code**.
+These are hard constraints (from the platform red-team review), not preferences:
+
+- **C1 — bare untrusted job:** the extract/build/validate job runs with **no
+  secrets**, a read-only token, on **ephemeral** GitHub-hosted runners; third-party
+  actions pinned by commit SHA. Never a persistent self-hosted runner.
+- **C2 — token quarantine:** the SWH Save-Code-Now token lives **only** in a
+  curator-gated Environment job that **never checks out or executes** archive
+  content.
+- **C3 — contributors hold no trusted credentials:** treat contributor input as
+  fork-PR-untrusted; keep first-time-contributor approval on. Never grant upload
+  write that auto-triggers a secret-bearing workflow (that write bypasses the
+  untrusted-contributor gate). This is why uploads go on the issue.
+- **C5 — thin repo, central logic:** the per-acquisition repo carries a **thin
+  caller pinned to a version tag**; all engine logic lives in a **versioned
+  reusable workflow / packaged engine**, so fixes reach hundreds of existing
+  workbenches by a version bump (a copied-in workflow never auto-updates).
+- **C6 — platform abstraction:** all GitHub-only glue (generate-from-template
+  API, Actions, Environments, typed issue-forms) sits behind an interface; the
+  deterministic engine stays a plain CLI/container so it can run under GitLab CI
+  (D6). Nothing SWHAP-critical depends on a GitHub-only primitive.
+
 ## Validation is the gate
 
 The validator (`engine/tools/validator`, entrypoint `check_swhap.sh`) runs a

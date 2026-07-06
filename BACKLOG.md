@@ -31,18 +31,46 @@ regression".
   extraction-only `extraction-recipe.yaml`. (Seeded; ensure no `releases.yaml`
   path survives.)
 
+## Provisioning at scale (decision D11)
+
+- **P1 — Stand up the intake front door** `intake` `chassis`
+  Deploy [`intake/`](intake/) as its own repo (`swhap-workbenches/swhap-intake`,
+  internal): the reachable "Acquire legacy software" form. Contributor's whole
+  contract is one issue — no repo creation, no PR.
+- **P2 — Provisioning: curator-click → GitHub App** `chassis` `security`
+  One code path with a swappable gate. Start manual (curator "Use this template");
+  later a GitHub App using the generate-from-template API with a **short-lived
+  minted token, Actions-only, no webhook server** (App scales per-org for D6).
+  Derive the App's exact token scopes from the instrumented C-Prolog #2 run.
+- **P3 — Per-acquisition repos are org-owned** `chassis`
+  Provision into `swhap-workbenches` (not contributor personal accounts —
+  outsiders can't create in the org anyway); apply branch protection post-create
+  (templates carry none).
+
 ## Chassis engineering seams
 
 - **S1 — Move extraction into the engine (`swhap extract`)** `engine` `chassis`
   Today `chassis/scripts/` owns `raw_materials → source_code` (wrapper-strip,
   `.emptydir`). A second extractor can drift from what the validator checks;
   one validated code path should own it.
-- **S2 — Pin the engine install** `chassis` `ci`
-  Workflows install the engine from the monorepo `engine/` subdir by git ref.
-  Pin a tag (or publish `swhap-core`/`swhap-validate` to PyPI) before production.
+- **S2 — Thin caller + versioned engine (C5)** `chassis` `ci`
+  Move all logic behind a **versioned reusable workflow / packaged engine** pinned
+  to a tag, so 100s of workbenches update by version bump (a copied-in workflow
+  never auto-updates). Workflows currently install from `engine/` by `@main`.
 - **S3 — Confirm the Save Code Now endpoint / credentials** `chassis`
   Verify the SWH API path; prefer routing through the engine's
   `publish --save-code-now` adapter over a raw curl.
+- **S4 — Split untrusted build from the token (C1/C2)** `chassis` `security`
+  build-and-publish must become two jobs: a **secrets-free** build (ephemeral
+  runner, read-only token) and a **curator-Environment-gated** publish that never
+  checks out or runs archive content. The token must never share a job with
+  untrusted extraction.
+- **S5 — Candidate re-validation mechanics** `chassis` `engine`
+  Resolve how `swhap-validate` validates a candidate ref (checkout vs a new flag).
+- **S6 — GitLab / platform abstraction (C6, D6)** `engine`
+  Keep the engine a plain CLI/container behind an interface; Actions, the
+  generate API, Environments, and typed issue-forms are GitHub-only and won't
+  port to a self-hosted GitLab instance.
 
 ## Quality gap surfaced by the pilot (engine)
 

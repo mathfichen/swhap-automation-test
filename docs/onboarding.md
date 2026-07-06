@@ -1,7 +1,10 @@
-# Start here (for collaborators)
+# Start here (for people building the tooling)
 
-Welcome. This repo initializes the shared SWHAP-automation effort. Here's the
-fastest path in.
+Welcome. This is the development hub for the SWHAP-automation effort. Here's the
+fastest path in for a developer or curator working *on* the tooling.
+
+> Just want to hand in old software? You don't need any of this — the
+> contributor path is one form: [`../CONTRIBUTING.md`](../CONTRIBUTING.md) §A.
 
 ## Read, in order
 

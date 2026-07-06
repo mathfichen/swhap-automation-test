@@ -2,30 +2,36 @@
 
 Two very different kinds of contribution happen here. Find yours.
 
-## A. Curating an acquisition (non-expert, GitHub-only)
+## A. Handing in old software (contributor — one form, browser only)
 
-You have old software and want to turn it into an archival-ready workbench. You
-do **not** need Git, a terminal, or programming — just a GitHub account and a web
-browser. The [`chassis/`](chassis/) intake surface walks you through it:
+You have old software and want it preserved. **Your whole job is to fill in one
+form.** You do not need Git, a terminal, a pull request, or to create any
+repository — a curator sets all that up *for* you (decision D11).
 
-1. Start from the intake issue template (or the template repository).
-2. Upload your archive(s) through the GitHub web UI.
-3. Fill in what you know (project name, authors, release dates) — the assistant
-   drafts the rest and asks you about anything uncertain.
-4. Open a pull request. CI validates it and shows you exactly what, if anything,
-   needs fixing. A curator reviews before anything is published.
+1. **Open a request** at the intake front door and drag-drop your archive(s)
+   (or paste URLs for large ones). Fill in what you know — project name, authors,
+   approximate dates. "Unknown" and "around 1993" are fine. Submit.
+2. **That's it.** A curator provisions the workbench, and the assistant drafts
+   the metadata. If anything is uncertain ("we think 1.0 is March 1994 —
+   confirm?"), you'll be asked in plain comments on your request.
+3. **A curator reviews and publishes.** You get notified with the archived
+   result and its citation.
 
-You are always in control: the AI *proposes*, and a human curator approves every
-judgement call (licenses, attributions, inferred dates).
+You are always in control: the AI *proposes*; a human curator approves every
+judgement call (licenses, attributions, inferred dates). The intake form and its
+scaffold live in [`intake/`](intake/); the workbench machinery it feeds is
+[`chassis/`](chassis/) (both are for operators to deploy — not something you
+touch).
 
 ## B. Developing the tooling
 
 You are changing the engine, the chassis, or the docs.
 
-**Read first:** [`docs/architecture.md`](docs/architecture.md) and
-[`docs/decisions.md`](docs/decisions.md). The decisions (`D1`–`D10`) and the
-compliance invariants are binding — a change that violates one is a bug, not a
-feature. Unsure about a code? [`docs/glossary.md`](docs/glossary.md).
+**Start at** [`docs/onboarding.md`](docs/onboarding.md) — it sequences the reading
+(README → architecture → decisions → roadmap). The decisions (`D1`–`D11`) and the
+compliance invariants in [`docs/architecture.md`](docs/architecture.md) are
+binding — a change that violates one is a bug, not a feature. Unsure about a code?
+[`docs/glossary.md`](docs/glossary.md).
 
 **Ground rules that come up constantly:**
 

@@ -1,7 +1,16 @@
 name: Validate PR (inspect + dry-run build + compliance gate)
 
-# Replaces the template's "Validate & Dry-run": adds the real compliance gate.
-# A red validator report FAILS the check — the generator is never rubber-stamped.
+# ┌─ DRAFT — reference shape, not yet the production workflow ──────────────────┐
+# │ This runs an untrusted extract+build, so it MUST stay secrets-free (C1):    │
+# │ no secrets, read-only token, ephemeral runner. The target architecture is a │
+# │ THIN CALLER of a versioned reusable workflow + packaged engine (C5), not    │
+# │ the inline steps below — see docs/architecture.md and BACKLOG (S-items).    │
+# │ Verified-broken commands from the first draft are fixed here; the full      │
+# │ restructure is derived from the instrumented C-Prolog #2 run.               │
+# └────────────────────────────────────────────────────────────────────────────┘
+#
+# Adds the real compliance gate: a red validator report FAILS the check — the
+# generator is never rubber-stamped.
 
 on:
   pull_request:
@@ -11,23 +20,22 @@ on:
       - "metadata/extraction-recipe.yaml"   # extraction-only; NOT the history authority
 
 permissions:
-  contents: read
-  pull-requests: write
+  contents: read          # C1: read-only, no secrets in this untrusted-build job
 
 jobs:
   validate:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 0, persist-credentials: false }
 
-      - name: Install extraction tools + toolkit
+      - name: Install extraction tools + engine
         run: |
           sudo apt-get update
           sudo apt-get install -y libarchive-tools p7zip-full ncompress
-          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip pyyaml   # build_source_tree.py needs PyYAML
           # Engine lives in the SoftwareHeritage/swhap-automation monorepo under
-          # engine/. A consumer template pins it by git ref (or PyPI once published):
+          # engine/. Pin a tag before production (C5); @main shown for now:
           pip install "swhap-core @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/swhap-core"
           pip install "swhap-validate @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/tools/validator"
 
@@ -38,20 +46,22 @@ jobs:
 
       - name: Extract raw_materials -> source_code (strip + .emptydir)
         run: |
-          # TODO(confirm, README Q1): prefer `swhap extract` if the toolkit owns
-          # extraction; until then this is the template's validated extractor.
-          python3 scripts/extract_any.py --recipe metadata/extraction-recipe.yaml
+          # build_source_tree.py reads the recipe and drives extract_any.py per tree.
+          # Open seam: fold extraction into the engine as `swhap extract` (BACKLOG S1).
+          python3 scripts/build_source_tree.py --recipe metadata/extraction-recipe.yaml
 
       - name: Dry-run build (plan only — touches NO refs)
         run: |
-          EPOCH="$(cat metadata/curation-epoch)"   # README Q2: committed fixed D4 timestamp
+          EPOCH="$(cat metadata/curation-epoch)"   # committed fixed D4 timestamp
           swhap build --workbench . --model P --plan \
             --curation-epoch "$EPOCH" \
             --plan-file plan.json --json | tee build-plan.json
 
       - name: Compliance gate (TF / BP / CSV / CM / SZ / PI) — RED FAILS
         run: |
-          ./check_swhap.sh --workbench . --json | tee validator-report.json
+          # swhap-validate is the packaged console entrypoint (check_swhap.sh is a
+          # bash wrapper that ships only inside the engine, not the workbench).
+          swhap-validate --profile strict-P --gate build --workdir . --report validator-report.json
 
       - name: Upload plan + validator report for reviewers
         if: always()

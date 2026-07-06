@@ -13,12 +13,27 @@ Plain-language meaning of the shorthand used across this repo.
 | **SWHID** | Software Heritage intrinsic identifier (`swh:1:…`) — permanent, content-derived. |
 | **Curation timestamp / epoch** | A fixed committer/tagger date (D4) that makes rebuilds bit-identical. |
 
+## Web-UI & provisioning terms
+
+For anyone meeting these in the browser, not the code.
+
+| Term | Plain meaning |
+|---|---|
+| **Front door / intake repo** | The one place a contributor goes to hand in software: a standing repo whose only job is the "Acquire legacy software" form. |
+| **Provisioning** | A curator (later a bot) creating the per-acquisition workbench repo *for* the contributor, so they never have to. |
+| **Workbench** | The per-acquisition repo the provisioning step creates from the template. |
+| **Pull request (PR)** | GitHub's "propose these changes" mechanism. Used *internally* by curators/CI — a contributor never opens one. |
+| **CI / GitHub Actions** | Automatic checks GitHub runs on a submission (here: extract, build, validate). |
+| **Template repository / "Use this template"** | A repo marked so others can create a fresh copy of it. Used by operators, not contributors. |
+| **GitHub App / minted token** | A least-privilege identity that provisions repos with a short-lived token (no standing password, no server). |
+
 ## Decisions (D-codes)
 
-`D1`–`D10` are the binding decisions — see [`decisions.md`](decisions.md). Quick
+`D1`–`D11` are the binding decisions — see [`decisions.md`](decisions.md). Quick
 index: **D1** Model P · **D2** canonical CSV · **D3** rebuild-and-replace · **D4**
 bit-reproducibility · **D5** forge intake · **D6** self-host · **D7** MVP scope ·
-**D8** Wild_LIFE regeneration · **D9** CodeMeta context policy · **D10** 1.02 date.
+**D8** Wild_LIFE regeneration · **D9** CodeMeta context policy · **D10** 1.02 date ·
+**D11** provisioned (not self-service) intake.
 
 ## Milestones
 

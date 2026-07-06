@@ -1,9 +1,21 @@
 name: Build SourceCode + publish (bit-reproducible, DV-1-safe)
 
-# Replaces the template's "Regenerate SourceCode" (which force-pushed with no
-# tags and no lineage). Here: build to a CANDIDATE ref, re-validate the
-# candidate, then publish through `swhap publish` — which enforces DV-1 and the
-# revised-D3 supersede flow. There is NO `git push -f` anywhere.
+# ┌─ DRAFT — reference shape, NOT production-safe yet ──────────────────────────┐
+# │ SECURITY DEBT (C2): this draft extracts untrusted archives AND holds the    │
+# │ SWH token in the SAME job. The production shape MUST split into two jobs:    │
+# │   1) a bare build job (no secrets, read-only token, ephemeral runner — C1)  │
+# │      that produces the candidate + a bundle artifact;                       │
+# │   2) a publish job gated by a GitHub Environment (required reviewers =       │
+# │      curator team) that holds the SWH token and NEVER checks out or runs     │
+# │      archive content (C2).                                                   │
+# │ Engine install should be a pinned tag / packaged reusable workflow (C5).    │
+# │ Candidate re-validation mechanics + the split are derived from the          │
+# │ instrumented C-Prolog #2 run. See docs/architecture.md + BACKLOG.           │
+# └────────────────────────────────────────────────────────────────────────────┘
+#
+# Replaces the first template's "Regenerate SourceCode" (which force-pushed with
+# no tags and no lineage). Build to a CANDIDATE ref, re-validate, then publish via
+# `swhap publish` — DV-1 divergence guard + revised-D3 supersede. NO `git push -f`.
 
 on:
   workflow_dispatch:
@@ -23,20 +35,23 @@ permissions:
 jobs:
   build-publish:
     runs-on: ubuntu-latest
+    # Partial C2 mitigation until the two-job split lands: gate the whole run
+    # (and thus the token) behind a curator-reviewed Environment.
+    environment: publish
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with: { fetch-depth: 0, persist-credentials: false }
 
-      - name: Install extraction tools + toolkit
+      - name: Install extraction tools + engine
         run: |
           sudo apt-get update
           sudo apt-get install -y libarchive-tools p7zip-full ncompress
-          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade pip pyyaml
           pip install "swhap-core @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/swhap-core"
           pip install "swhap-validate @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/tools/validator"
 
       - name: Extract raw_materials -> source_code
-        run: python3 scripts/extract_any.py --recipe metadata/extraction-recipe.yaml
+        run: python3 scripts/build_source_tree.py --recipe metadata/extraction-recipe.yaml
 
       - name: Build history to a candidate ref (bit-reproducible, D4; tags created)
         id: build
@@ -45,11 +60,14 @@ jobs:
           swhap build --workbench . --model P --apply \
             --curation-epoch "$EPOCH" \
             --json | tee apply.json
-          # candidate ref = refs/heads/candidate/P/<run-id>; capture from apply.json
           echo "candidate_ref=$(jq -r '.candidate_ref' apply.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Re-validate the candidate — RED FAILS, nothing publishes
-        run: ./check_swhap.sh --workbench . --candidate-ref "${{ steps.build.outputs.candidate_ref }}" --json
+      - name: Re-validate before publish — RED FAILS, nothing publishes
+        run: |
+          # TODO(C-Prolog #2): resolve candidate-ref re-validation mechanics — the
+          # validator reads --workdir; the candidate ref must be checked out (or a
+          # --candidate-ref option added to swhap-validate). Placeholder gate:
+          swhap-validate --profile strict-P --gate publish --workdir . --report revalidate.json
 
       - name: Publish (DV-1 divergence guard + supersede lineage)
         env:
@@ -66,5 +84,5 @@ jobs:
             --remote "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}" \
             --curator-login "${{ github.actor }}" \
             "${EXTRA[@]}" --json
-          # Save Code Now is deliberately NOT triggered here (D7 — out of MVP);
+          # Save Code Now deliberately NOT triggered here (D7 — out of MVP);
           # run archive-swh.yml explicitly after a green publish if desired.

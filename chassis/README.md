@@ -1,15 +1,23 @@
 # chassis — GitHub-native intake surface
 
-The surface a **non-expert** drives entirely through the GitHub web UI to curate
-an acquisition: upload archives → open a PR → CI validates and builds → a curator
-reviews → publish. It is the realization of decisions **D5** (forge intake) and
-**D6** (self-host; each institution runs its own instance).
+The **per-acquisition workbench template**. A curator provisions one copy of it
+per acquisition (decision **D11**); inside that copy, uploaded archives are
+extracted, built into a Model-P history by the engine, validated, and published.
+The **contributor never touches this** — they only file the intake form (see
+[`../intake`](../intake)). This realizes **D5** (forge intake) and **D6**
+(self-host).
 
 **This directory is a _template_ to be copied out, not run in place.** Its
 workflows live under `chassis/.github/` so they do **not** execute in the
-`swhap-automation` monorepo. To use it, copy `chassis/` into a new repository
-(eventually: mark that repo a GitHub *template repository* and "Use this
-template").
+`swhap-automation` monorepo. It is provisioned into a new per-acquisition repo
+(via "Use this template" / the generate API — by a curator or bot, per D11).
+
+> **The workflows here are DRAFT.** They show the intended shape but are not
+> production-safe: the build-and-publish flow still co-locates untrusted
+> extraction with the SWH token and must be split per security constraints
+> **C1/C2** (see [`../docs/architecture.md`](../docs/architecture.md)), and all
+> logic should move behind a versioned reusable workflow / packaged engine
+> (**C5**). The production shape is derived from the instrumented C-Prolog #2 run.
 
 ## How it differs from the first hand-rolled template
 
@@ -27,7 +35,6 @@ verified engine** so those defects cannot recur.
 | `.github/workflows/pr-validate.yml` | On every PR: inspect uploads → extract → engine dry-run build (`--plan`, no refs) → **`check_swhap.sh` compliance gate (red fails)** → upload plan + report. |
 | `.github/workflows/build-and-publish.yml` | Maintainer dispatch: engine `build --apply` to a candidate ref → re-validate → `swhap publish` (DV-1- and supersede-safe). **No force-push.** |
 | `.github/workflows/archive-swh.yml` | Optional, manual, post-publish Save Code Now (automatic ingestion is out of MVP, D7). |
-| `.github/ISSUE_TEMPLATE/acquisition-intake.yml` | The non-expert intake form (D5). |
 | `metadata/version_history.csv` | **The authoritative manifest** (D2): order, author, date, curator, tag, message. |
 | `metadata/extraction-recipe.yaml` | Extraction ONLY: how each raw archive → `source_code/<dir>/`. No authority over history. |
 | `metadata/curation-epoch` | The fixed committer/tagger timestamp for bit-reproducibility (D4). |
@@ -46,15 +53,20 @@ History and extraction are separated on purpose:
 
 Keep the two in sync by their shared keys.
 
-## Open seams (tracked as issues)
+## Open seams (tracked in [`../BACKLOG.md`](../BACKLOG.md))
 
-1. **Who owns extraction.** Today `scripts/` does it (proven in the C-Prolog
-   run). Target: move it into the engine as `swhap extract` so one validated code
-   path owns wrapper-strip + `.emptydir` and cannot drift from what the validator
-   checks.
-2. **Engine pinning.** The workflows install the engine from the monorepo
-   `engine/` subdir by git ref; pin a tag (or publish to PyPI) before production.
-3. **Save Code Now endpoint / credentials** — confirm against SWH API docs;
-   prefer routing through the engine's own `publish --save-code-now` adapter.
+1. **Split untrusted build from the token (C1/C2).** The build-and-publish
+   workflow must become two jobs: a secrets-free build (ephemeral runner) and a
+   curator-Environment-gated publish that never runs archive content.
+2. **Thin caller + versioned engine (C5).** Move logic behind a reusable workflow
+   / packaged engine pinned to a tag, so hundreds of workbenches update by version
+   bump instead of a per-repo edit.
+3. **Who owns extraction.** Today `scripts/` does it; target is `swhap extract`
+   in the engine so one validated path owns wrapper-strip + `.emptydir`.
+4. **Save Code Now endpoint / credentials** — confirm against SWH API docs;
+   prefer the engine's `publish --save-code-now` adapter.
+5. **Candidate re-validation mechanics** — resolve how `swhap-validate` checks a
+   candidate ref (checkout vs a new flag).
 
-The workflow files carry `# TODO(confirm)` markers at exactly these points.
+The workflow files carry a **DRAFT** banner; the production shape is derived from
+the instrumented C-Prolog #2 run.
