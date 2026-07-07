@@ -78,7 +78,7 @@ never creates a repo or opens a pull request. The flow:
 
 ```
 [standing intake repo]  ──issue (the form)──►  [provisioning gate]  ──►  [per-acquisition workbench]
-  swhap-workbenches/          contributor's           curator-click now,        org-owned, one per acquisition,
+  SWHAP-workbenches/          contributor's           curator-click now,        org-owned, one per acquisition,
   swhap-intake                whole job ends here      GitHub App later          uploads land on the ISSUE
   (the ONE front door)                                 (minted token, no server)  not on a PR / not repo write
                                                                                  │
@@ -90,7 +90,7 @@ never creates a repo or opens a pull request. The flow:
   holds the typed intake issue-form; see [`../intake`](../intake) for the scaffold.
 - **Uploads land on the intake issue**, never as a contributor push/PR. This is
   both a UX choice (no PR jargon) and a security requirement — see C3 below.
-- **Provisioning** creates the workbench **org-owned** in `swhap-workbenches`
+- **Provisioning** creates the workbench **org-owned** in `SWHAP-workbenches`
   (SWH instance zero; each institution self-hosts its own org under D6). An
   external non-member cannot create a repo in an org, so self-service is not the
   outsider path — provisioning is.

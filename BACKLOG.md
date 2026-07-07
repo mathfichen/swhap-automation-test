@@ -34,7 +34,7 @@ regression".
 ## Provisioning at scale (decision D11)
 
 - **P1 — Stand up the intake front door** `intake` `chassis`
-  Deploy [`intake/`](intake/) as its own repo (`swhap-workbenches/swhap-intake`,
+  Deploy [`intake/`](intake/) as its own repo (`SWHAP-workbenches/swhap-intake`,
   internal): the reachable "Acquire legacy software" form. Contributor's whole
   contract is one issue — no repo creation, no PR.
 - **P2 — Provisioning: curator-click → GitHub App** `chassis` `security`
@@ -43,7 +43,7 @@ regression".
   minted token, Actions-only, no webhook server** (App scales per-org for D6).
   Derive the App's exact token scopes from the instrumented C-Prolog #2 run.
 - **P3 — Per-acquisition repos are org-owned** `chassis`
-  Provision into `swhap-workbenches` (not contributor personal accounts —
+  Provision into `SWHAP-workbenches` (not contributor personal accounts —
   outsiders can't create in the org anyway); apply branch protection post-create
   (templates carry none).
 

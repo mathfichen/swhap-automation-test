@@ -47,8 +47,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libarchive-tools p7zip-full ncompress
           python3 -m pip install --upgrade pip pyyaml
-          pip install "swhap-core @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/swhap-core"
-          pip install "swhap-validate @ git+https://github.com/SoftwareHeritage/swhap-automation@main#subdirectory=engine/tools/validator"
+          pip install "swhap-core @ git+https://github.com/SWHAP/swhap-automation@main#subdirectory=engine/swhap-core"
+          pip install "swhap-validate @ git+https://github.com/SWHAP/swhap-automation@main#subdirectory=engine/tools/validator"
 
       - name: Extract raw_materials -> source_code
         run: python3 scripts/build_source_tree.py --recipe metadata/extraction-recipe.yaml

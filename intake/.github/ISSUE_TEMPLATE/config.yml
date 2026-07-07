@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: I want to help build the SWHAP tooling
-    url: https://github.com/SoftwareHeritage/swhap-automation
+    url: https://github.com/SWHAP/swhap-automation
     about: Developers and curators building the automation start in the development hub.

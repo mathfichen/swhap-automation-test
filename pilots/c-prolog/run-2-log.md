@@ -71,10 +71,10 @@ for #2; the App later automates steps 3–5, 8.
 
 | # | Action | Permission required → App scope |
 |---|---|---|
-| 0 | Create the org (`swhap-workbenches` or chosen name) | org creation (human owner) |
-| 1 | Push `chassis/` as `swhap-workbenches/chassis`; Settings → **Template repository** | repo admin |
-| 2 | Create `swhap-workbenches/swhap-intake` (internal); add `intake/.github/` | **Administration: write** (create repo in org) |
-| 3 | Provision: **Use this template** → `swhap-workbenches/c-prolog` | **Administration: write** (generate-from-template) |
+| 0 | Create the org (`SWHAP-workbenches` or chosen name) | org creation (human owner) |
+| 1 | Push `chassis/` as `SWHAP-workbenches/chassis`; Settings → **Template repository** | repo admin |
+| 2 | Create `SWHAP-workbenches/swhap-intake` (internal); add `intake/.github/` | **Administration: write** (create repo in org) |
+| 3 | Provision: **Use this template** → `SWHAP-workbenches/c-prolog` | **Administration: write** (generate-from-template) |
 | 4 | Put `raw_materials/` + `metadata/*` (the committed inputs) in place | **Contents: write** |
 | 5 | Confirm **Actions are enabled** (not blocked by org policy/SSO) | Actions settings |
 | 6 | PR-validate CI runs → confirm report matches the local **0 FAIL** | — |

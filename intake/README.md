@@ -2,7 +2,7 @@
 
 This directory is the **scaffold for the standing intake repository** — the one
 place a contributor goes to hand in old software. It is deployed as its own repo
-(e.g. `swhap-workbenches/swhap-intake`), **not** run from this development hub and
+(e.g. `SWHAP-workbenches/swhap-intake`), **not** run from this development hub and
 **not** part of the per-acquisition workbench template (`../chassis`).
 
 Why it lives in its own repo (decision **D11**): the front door must exist
@@ -20,7 +20,7 @@ never creates a repo and never opens a pull request.
 
 ## To deploy (curator/operator)
 
-1. Create the intake repo in your acquisition org (`swhap-workbenches/swhap-intake`).
+1. Create the intake repo in your acquisition org (`SWHAP-workbenches/swhap-intake`).
    Recommended **internal/private** — old archives may carry personal data.
 2. Copy this `.github/` into it. The "Acquire legacy software" form then appears
    under **Issues → New issue**.
