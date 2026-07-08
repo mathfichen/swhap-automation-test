@@ -80,10 +80,12 @@ regression".
   fidelity *passes* faithful junk. Add a curator-approvable heuristic lint —
   **including a PII content-scan** (C-Prolog #2 shipped a stranger's SSN in
   `hw4.pl`; PI-1 only lints the CSV today, not file contents).
-- **W1 — BP-2 allowlist must permit `codemeta.json` at root** `engine` `bug`
+- **W1 — BP-2 allowlist must permit `codemeta.json` at root** `engine` `bug` ✅ **done**
   Architecture B5 promotes `codemeta.json` to the default-branch root (SWH indexes
-  only there), but `_MAIN_ALLOW` rejects it → BP-2 FAIL (found on C-Prolog #2). Add
-  `codemeta.json` to the allowlist so a published, indexable workbench validates.
+  only there), but `_MAIN_ALLOW` rejected it → BP-2 FAIL (found on C-Prolog #2).
+  Fixed: `codemeta.json` added to `_MAIN_ALLOW` in `branch_purity.py`; regression
+  test `test_bp2_codemeta_at_root_allowed` added. Confirmed on C-Prolog #2 rebuilt
+  with root codemeta → 0 FAIL / 1 WARN / 21 PASS; full validator suite 131 passed.
 - **W2 — Workbench self-CI vs branch-purity** `engine` `chassis`
   `.github/` is not in `_MAIN_ALLOW`, so a provisioned workbench can't carry its
   own CI workflows without failing BP-2. Decide how a workbench runs its own

@@ -99,3 +99,14 @@ def test_bp3_annotated_tag_required(tmp_path):
     _g(repo, "tag", "v2.0")  # lightweight
     rep = _run(repo, release_tags=("v1.0", "v2.0"))
     assert any(f.object.get("tag") == "v2.0" for f in _bp(rep, "BP-3"))
+
+
+def test_bp2_codemeta_at_root_allowed(tmp_path):
+    # SWH indexes codemeta.json only at the default-branch root (B5 promotion);
+    # BP-2 must permit it there (W1).
+    repo = build_repo(str(tmp_path / "r"),
+                      {"README.md": b"x", "codemeta.json": b"{}",
+                       "metadata/x": b"y"},
+                      {"Source/a.c": b"x"}, orphan=True)
+    assert not any(f.object.get("path") == "codemeta.json"
+                   for f in _bp(_run(repo), "BP-2"))
