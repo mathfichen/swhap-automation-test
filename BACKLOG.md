@@ -74,12 +74,24 @@ regression".
 
 ## Quality gap surfaced by the pilot (engine)
 
-- **Q1 — Curation-noise lint (advisory)** `engine` `enhancement`
+- **Q1 — Curation-noise + PII lint (advisory)** `engine` `enhancement` `security`
   Neither the template nor the engine flags in-tree build artifacts (`.o`, `.out`,
-  `*.save`), macOS AppleDouble files (`._*`), or foreign bundled files (C-Prolog
-  shipped `hw1`, `hw4.pl` — someone's homework). Tree-fidelity *passes* faithful
-  junk. Add a curator-approvable heuristic lint so non-experts are warned before
-  publishing.
+  `*.save`), macOS AppleDouble files (`._*`), or foreign bundled files. Tree-
+  fidelity *passes* faithful junk. Add a curator-approvable heuristic lint —
+  **including a PII content-scan** (C-Prolog #2 shipped a stranger's SSN in
+  `hw4.pl`; PI-1 only lints the CSV today, not file contents).
+- **W1 — BP-2 allowlist must permit `codemeta.json` at root** `engine` `bug`
+  Architecture B5 promotes `codemeta.json` to the default-branch root (SWH indexes
+  only there), but `_MAIN_ALLOW` rejects it → BP-2 FAIL (found on C-Prolog #2). Add
+  `codemeta.json` to the allowlist so a published, indexable workbench validates.
+- **W2 — Workbench self-CI vs branch-purity** `engine` `chassis`
+  `.github/` is not in `_MAIN_ALLOW`, so a provisioned workbench can't carry its
+  own CI workflows without failing BP-2. Decide how a workbench runs its own
+  validation (reusable-workflow caller allowed on main? separate CI ref?).
+- **W3 — Curation-exclusion manifest** `engine`
+  Record the curator's noise/PII exclusions so the curated tree is reproducible
+  from raw + extraction-recipe + exclusions (today the exclusions are hand-applied
+  and only documented in the journal).
 
 ## Milestone M2 / project (from the roadmap)
 

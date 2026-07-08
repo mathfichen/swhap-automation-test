@@ -90,6 +90,38 @@ outsiders.
 
 ---
 
+## Finalization — PII-redacted & published (2026-07-08)
+
+Opening the flagged files turned C-6 from tidiness into a **privacy finding**:
+`hw1`/`hw4.pl` are a 1988 student's homework (CSE 511) containing a real **SSN**
+(`245-29-5485`) — foreign to C-Prolog, and unpublishable.
+
+Ruling applied (Roberto, 2026-07-08):
+- **Curated tree:** excluded `hw1`, `hw4.pl`, `*.o`, `man/*.out`, `*.save`
+  (and the AppleDouble `._*`); kept source, headers, `pl/` library, man sources,
+  `copyrigh.t`, runtime files.
+- **Raw archive:** repackaged minus the two homework files (**D12** — journaled
+  PII-redaction, not silent alteration); verified 0 SSN occurrences, 0 homework
+  members in the new tarball.
+- **Rebuilt + re-validated:** still **0 FAIL / 1 WARN / 21 PASS** (WARN = the
+  curator-email opt-in). Published layout: `main` (README + metadata +
+  raw_materials), orphan `SourceCode`, annotated `v1.5`.
+
+### Two engine/spec findings this surfaced (filed in BACKLOG)
+
+1. **`codemeta.json` at root vs BP-2.** Architecture B5 says publish must promote
+   `codemeta.json` to the default-branch root (SWH indexes only there), but the
+   validator's `_MAIN_ALLOW` rejects it → BP-2 FAIL. The allowlist must add
+   `codemeta.json`. For now C-Prolog #2 keeps codemeta in `metadata/` (validator-
+   clean) and root-promotion is deferred.
+2. **Workbench self-CI vs BP-2.** `.github/` is not in `_MAIN_ALLOW` either, so a
+   workbench cannot carry its own CI workflows without failing branch-purity —
+   the "how does a provisioned workbench run its own validation" design question.
+3. **Curation-exclusion manifest gap.** The curated tree differs from what the
+   extraction-recipe reproduces (noise removed by hand). The engine needs a
+   recorded exclusion list so the curated tree is reproducible from
+   raw + recipe + exclusions.
+
 ## Outputs of this run
 
 - Reproducible inputs: [`workbench-inputs/`](workbench-inputs/) (CSV, extraction
