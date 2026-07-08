@@ -34,11 +34,22 @@ verified engine** so those defects cannot recur.
 |---|---|
 | `.github/workflows/pr-validate.yml` | On every PR: inspect uploads → extract → engine dry-run build (`--plan`, no refs) → **`check_swhap.sh` compliance gate (red fails)** → upload plan + report. |
 | `.github/workflows/build-and-publish.yml` | Maintainer dispatch: engine `build --apply` to a candidate ref → re-validate → `swhap publish` (DV-1- and supersede-safe). **No force-push.** |
+| `.github/workflows/self-validate.yml` | Compliance heartbeat: re-runs the strict-P gate on any push (read-only, secrets-free) so a **published** workbench proves it stays compliant, not only at acquisition time. |
 | `.github/workflows/archive-swh.yml` | Optional, manual, post-publish Save Code Now (automatic ingestion is out of MVP, D7). |
 | `metadata/version_history.csv` | **The authoritative manifest** (D2): order, author, date, curator, tag, message. |
 | `metadata/extraction-recipe.yaml` | Extraction ONLY: how each raw archive → `source_code/<dir>/`. No authority over history. |
 | `metadata/curation-epoch` | The fixed committer/tagger timestamp for bit-reproducibility (D4). |
 | `scripts/extract_any.py`, `scripts/build_source_tree.py` | Materialize `source_code/` from `raw_materials/` + the recipe (wrapper-strip, `.emptydir`). |
+
+## Why the workbench may carry its own `.github/` (W2)
+
+A provisioned workbench needs to run its own compliance check, so it carries
+`.github/workflows/`. Branch purity (BP-2) permits `.github/` **on the workbench
+branch** — it is workbench infrastructure, like `metadata/` and `scripts/`. It is
+**forbidden on `SourceCode`**, which holds reconstructed source alone; the
+validator now FAILs BP-2 if `.github/` leaks there. The workflows should become
+thin callers of a versioned reusable workflow (C5 / BACKLOG S2) so hundreds of
+workbenches update by a version bump rather than a per-repo edit.
 
 ## The two-manifest split (why there is no `releases.yaml`)
 

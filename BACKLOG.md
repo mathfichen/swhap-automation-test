@@ -86,10 +86,15 @@ regression".
   Fixed: `codemeta.json` added to `_MAIN_ALLOW` in `branch_purity.py`; regression
   test `test_bp2_codemeta_at_root_allowed` added. Confirmed on C-Prolog #2 rebuilt
   with root codemeta → 0 FAIL / 1 WARN / 21 PASS; full validator suite 131 passed.
-- **W2 — Workbench self-CI vs branch-purity** `engine` `chassis`
-  `.github/` is not in `_MAIN_ALLOW`, so a provisioned workbench can't carry its
-  own CI workflows without failing BP-2. Decide how a workbench runs its own
-  validation (reusable-workflow caller allowed on main? separate CI ref?).
+- **W2 — Workbench self-CI vs branch-purity** `engine` `chassis` ✅ **done**
+  `.github/` was not in `_MAIN_ALLOW`, so a provisioned workbench couldn't carry
+  its own CI without failing BP-2. Ruling: `.github/` is allowed **on the
+  workbench branch** (workbench infrastructure) and **forbidden on `SourceCode`**
+  (source-only). Fixed: `.github` added to `_MAIN_ALLOW` and to the SourceCode
+  forbidden list; regression tests `test_bp2_github_ci_on_main_allowed` +
+  `test_bp2_github_on_sourcecode_forbidden`. Added `chassis/.github/workflows/
+  self-validate.yml` (read-only, secrets-free compliance heartbeat). The
+  thin-caller-of-a-versioned-reusable-workflow restructure remains **S2**.
 - **W3 — Curation-exclusion manifest** `engine`
   Record the curator's noise/PII exclusions so the curated tree is reproducible
   from raw + extraction-recipe + exclusions (today the exclusions are hand-applied

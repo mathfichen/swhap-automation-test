@@ -110,3 +110,30 @@ def test_bp2_codemeta_at_root_allowed(tmp_path):
                       {"Source/a.c": b"x"}, orphan=True)
     assert not any(f.object.get("path") == "codemeta.json"
                    for f in _bp(_run(repo), "BP-2"))
+
+
+def test_bp2_github_ci_on_main_allowed(tmp_path):
+    # A provisioned workbench carries its own CI (a thin caller of the versioned
+    # engine); .github/ is workbench infrastructure and BP-2 must permit it on
+    # the workbench branch (W2).
+    repo = build_repo(str(tmp_path / "r"),
+                      {"README.md": b"x", "metadata/x": b"y",
+                       ".github/workflows/validate.yml": b"on: push"},
+                      {"Source/a.c": b"x"}, orphan=True)
+    assert not any(f.object.get("path") == ".github"
+                   for f in _bp(_run(repo), "BP-2"))
+
+
+def test_bp2_github_on_sourcecode_forbidden(tmp_path):
+    # .github/ belongs on the workbench branch only; it must never leak onto
+    # SourceCode, which holds reconstructed source alone (W2).
+    repo = build_repo(str(tmp_path / "r"),
+                      {"README.md": b"x", "metadata/x": b"y"},
+                      {"Source/a.c": b"x"}, orphan=True)
+    _g(repo, "checkout", "-q", "SourceCode")
+    _write(repo, ".github/workflows/leak.yml", b"on: push")
+    _g(repo, "add", "-A")
+    _g(repo, "commit", "-q", "-m", "leak")
+    _g(repo, "checkout", "-q", "main")
+    assert any(f.object.get("path") == ".github" and f.severity == "FAIL"
+               for f in _bp(_run(repo), "BP-2"))

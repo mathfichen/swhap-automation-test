@@ -1,0 +1,58 @@
+name: Self-validate (workbench compliance heartbeat)
+
+# ┌─ DRAFT — reference shape, not yet the production workflow ──────────────────┐
+# │ A provisioned workbench keeps its OWN copy of the compliance gate so that a │
+# │ published workbench proves it is still SWHAP-compliant after any change to  │
+# │ main or SourceCode — not only during the acquisition PR (pr-validate.yml).  │
+# │                                                                             │
+# │ This is why `.github/` is allowed on the workbench branch (BP-2 / W2): the  │
+# │ workbench's self-CI is workbench infrastructure and belongs on the          │
+# │ workbench branch. It must NEVER appear on SourceCode (the validator now     │
+# │ FAILs BP-2 if it does) — SourceCode holds reconstructed source alone.       │
+# │                                                                             │
+# │ TARGET SHAPE (C5 / BACKLOG S2): replace the inline install+gate below with  │
+# │ a single `uses:` of a versioned reusable workflow, e.g.                     │
+# │   jobs:                                                                     │
+# │     gate:                                                                   │
+# │       uses: SWHAP/swhap-automation/.github/workflows/compliance-gate.yml@vX │
+# │ so hundreds of workbenches update by bumping @vX, not by editing each repo. │
+# │ The inline body is kept only until that reusable workflow is published.     │
+# └────────────────────────────────────────────────────────────────────────────┘
+#
+# Read-only and secrets-free (C1): this never builds untrusted content and never
+# touches the SWH token. It re-runs the gate against what is already committed.
+
+on:
+  push:
+    branches: ["**"]          # any workbench branch: main AND SourceCode
+  workflow_dispatch: {}
+
+permissions:
+  contents: read              # C1: read-only, no secrets
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0, persist-credentials: false }
+
+      - name: Install the engine (pin a tag before production — C5)
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install "swhap-validate @ git+https://github.com/SWHAP/swhap-automation@main#subdirectory=engine/tools/validator"
+
+      - name: Compliance gate (strict-P) — RED FAILS
+        run: |
+          # Validates the workbench as it stands (branch purity, tags, CSV grammar,
+          # codemeta context, sizes, PII lint). No build, no refs. --gate build (not
+          # publish) because this checks the repo's own committed state, not
+          # divergence against an external published remote (DV-1, gate publish only).
+          swhap-validate --profile strict-P --gate build --workdir . --report validator-report.json
+
+      - name: Upload validator report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swhap-self-validation
+          path: validator-report.json

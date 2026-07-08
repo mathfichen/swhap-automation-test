@@ -13,7 +13,11 @@ from ..report import FAIL, WARN, Finding
 _ROLE = "curator"
 
 # strict-P pure-default-branch allowlist (brief §9 / validator plan BP-2).
-_MAIN_ALLOW = {"README.md", "Makefile", "codemeta.json", "metadata", "raw_materials", "scripts"}  # codemeta.json: SWH indexes it only at the default-branch root (B5 promotion, W1)
+_MAIN_ALLOW = {"README.md", "Makefile", "codemeta.json", "metadata", "raw_materials", "scripts",
+               ".github"}  # codemeta.json: SWH indexes it only at the default-branch root (B5 promotion, W1).
+# .github: a provisioned workbench carries its own CI (a thin caller of the versioned
+# reusable engine, C5/S2); it is workbench infrastructure and belongs on the workbench
+# branch, never on SourceCode (W2).
 _MAIN_WARN = {"additional_materials"}  # pending D1
 
 
@@ -97,7 +101,7 @@ def _bp2(report, ctx, profile, default, sc):
     # SourceCode must hold source only (no metadata/raw_materials)
     if sc:
         top = set(ctx_ls_tree_top(ctx, "refs/heads/SourceCode"))
-        for forbidden in ("metadata", "raw_materials", "additional_materials"):
+        for forbidden in ("metadata", "raw_materials", "additional_materials", ".github"):
             if forbidden in top:
                 report.add(Finding(
                     "BP-2", FAIL,
