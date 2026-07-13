@@ -53,7 +53,7 @@ def extract_source(src: pathlib.Path, dest: pathlib.Path, strip_components: str|
         payload.mkdir()
 
         # bsdtar is path traversal safe; extract to temp then move.
-        cmd = ["bsdtar", "-xpf", str(src), "-C", str(payload)]
+        cmd = ["bsdtar", "-xf", str(src), "-C", str(payload)]
         subprocess.run(cmd, check=True)
 
         stage = payload
