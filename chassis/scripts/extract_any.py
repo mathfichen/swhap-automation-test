@@ -7,8 +7,6 @@ import subprocess
 import sys
 import tempfile
 
-Want to be notified whe
-
 # We rely on bsdtar (libarchive) for wide format support (.zip, .tar.*, .Z, .7z)
 # Install in CI: apt-get install -y libarchive-tools p7zip-full ncompress
 
