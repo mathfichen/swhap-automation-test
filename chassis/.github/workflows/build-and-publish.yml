@@ -1,4 +1,4 @@
-name: Build SourceCode + publish (bit-reproducible, DV-1-safe)
+name: Build SourceCode and publish
 
 # ┌─ DRAFT — reference shape, NOT production-safe yet ──────────────────────────┐
 # │ SECURITY DEBT (C2): this draft extracts untrusted archives AND holds the    │
