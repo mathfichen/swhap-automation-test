@@ -50,12 +50,22 @@ jobs:
           # Open seam: fold extraction into the engine as `swhap extract` (BACKLOG S1).
           python3 scripts/build_source_tree.py --recipe metadata/extraction-recipe.yaml
 
-      - name: Dry-run build (plan only — touches NO refs)
+      - name: Build candidate on the runner (local only, nothing pushed)
+        id: build
         run: |
-          EPOCH="$(cat metadata/curation-epoch)"   # committed fixed D4 timestamp
-          swhap build --workbench . --model P --plan \
+          set -eo pipefail
+          EPOCH="$(cat metadata/curation-epoch)"
+          swhap build --workbench . --model P \
             --curation-epoch "$EPOCH" \
-            --plan-file plan.json --json | tee build-plan.json
+            --json | tee build-apply.json
+
+      - name: Create local SourceCode + release tags from candidate
+        run: |
+          set -eo pipefail
+          git branch -f SourceCode "$(jq -er '.branch_ref' build-apply.json)"
+          for t in $(jq -r '.tags[].release_tag' build-apply.json); do
+            git tag -f "$t" "$(jq -r --arg t "$t" '.tags[] | select(.release_tag==$t) | .tag_ref' build-apply.json)"
+          done
 
       - name: Compliance gate (TF / BP / CSV / CM / SZ / PI) — RED FAILS
         run: |
