@@ -1,4 +1,4 @@
-name: Self-validate (workbench compliance heartbeat)
+name: Re-validate
 
 # ┌─ DRAFT — reference shape, not yet the production workflow ──────────────────┐
 # │ A provisioned workbench keeps its OWN copy of the compliance gate so that a │
