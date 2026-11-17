@@ -1,5 +1,19 @@
 """DV-1 — published-remote divergence (revised-D3 rebuild-and-replace).
 
+Simple explanation:
+Compares runner’s SourceCode branch (the new build) against the SourceCode branch already published on GitHub.
+
+The outcomes
+New build just adds on top of the published one: PASS. Nothing is reported.
+New build rewrites the published history:
+FAIL, unless the journal has a recorded, approved “supersede” (a curator sign-off plus a machine entry saying it was executed, and the old snapshot was archived in Software Heritage). With that record it becomes a WARN and is allowed.
+Skipped (no error) if:
+- there is no local SourceCode,
+- the remote can’t be reached,
+- nothing has been published yet.
+
+
+Complicated explanation: 
 Compares the workbench's local ``refs/heads/SourceCode`` against the history on
 the published remote and decides whether any divergence is *sanctioned*:
 
