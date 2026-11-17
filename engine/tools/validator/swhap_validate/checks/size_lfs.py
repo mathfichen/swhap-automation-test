@@ -1,8 +1,10 @@
-"""SZ-1..5 — size / LFS feasibility ladder (crit-M7 / N1).
+"""
+SZ-1 (FAIL): a file is 100 MiB or bigger. GitHub rejects files that large, so it can’t reach SWH.
+SZ-2 (FAIL): Git LFS is in use. LFS keeps the real file elsewhere and puts a tiny pointer in git, and SWH would archive only the pointer.
+SZ-3 (WARN): a file is bigger than 50 MiB. Just a warning.
+SZ-4 (WARN): a file in raw_materials/ is over 25 MiB. This only runs with --intake-profile browser, because browser uploads can’t handle large files.
+SZ-5 (INFO): the whole repo is over 1 GiB. Informational only.
 
-SZ-1 FAIL: blob ≥ 100 MiB (no GitHub+SWH path). SZ-2 FAIL: git-LFS use.
-SZ-3 WARN: blob > 50 MiB. SZ-4 WARN: raw material > 25 MiB under
---intake-profile browser. SZ-5 INFO: repo > 1 GiB.
 """
 from __future__ import annotations
 
