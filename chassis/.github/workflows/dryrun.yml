@@ -37,8 +37,14 @@ jobs:
 
       - name: Inspect uploaded archives (read-only rejection rules)
         run: |
-          shopt -s nullglob
-          swhap inspect raw_materials/**/* --json | tee inspect.json
+          set -eo pipefail
+          find raw_materials -type f \( -name '*.tar' -o -name '*.tar.*' -o -name '*.tgz' -o -name '*.tbz2' -o -name '*.txz' -o -name '*.zip' -o -name '*.7z' -o -name '*.Z' \) | sort > archives.txt
+          echo "Files to inspect:"; cat archives.txt
+          if [ -s archives.txt ]; then
+            xargs -d '\n' swhap inspect --json < archives.txt | tee inspect.json
+          else
+            echo '{"note":"no archives found in raw_materials"}' | tee inspect.json
+          fi
 
       - name: Extract raw_materials -> source_code (strip + .emptydir)
         run: |
