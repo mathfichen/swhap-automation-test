@@ -1,4 +1,4 @@
-name: Archive on Software Heritage (optional, post-publish)
+name: Archive on Software Heritage (beta)
 
 # Kept minimal and MANUAL: automatic final SWH ingestion is out of MVP scope
 # (D7). Run this only AFTER a green build-and-publish. Unchanged in spirit from
