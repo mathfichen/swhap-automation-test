@@ -100,6 +100,5 @@ jobs:
           name: swhap-validation
           path: |
             inspect.json
-            plan.json
-            build-plan.json
+            repo-snapshot.json
             validator-report.json
