@@ -32,8 +32,8 @@ jobs:
           python3 -m pip install --upgrade pip pyyaml   # build_source_tree.py needs PyYAML
           # Engine lives in the SWHAP/swhap-automation monorepo under
           # engine/. Pin a tag before production (C5); @main shown for now:
-          pip install "swhap-core @ git+https://github.com/mathfichen/swhap-automation-test@swhap-compliance#subdirectory=engine/swhap-core"
-          pip install "swhap-validate @ git+https://github.com/mathfichen/swhap-automation-test@swhap-compliance#subdirectory=engine/tools/validator"
+          pip install "swhap-core @ git+https://github.com/SWHAP/swhap-automation@main#subdirectory=engine/swhap-core"
+          pip install "swhap-validate @ git+https://github.com/SWHAP/swhap-automation@main#subdirectory=engine/tools/validator"
 
       - name: Inspect uploaded archives (read-only rejection rules)
         run: |
