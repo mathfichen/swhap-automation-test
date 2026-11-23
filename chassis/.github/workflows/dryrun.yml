@@ -13,7 +13,7 @@ name: Dryrun
 # generator is never rubber-stamped.
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
 
 permissions:
   contents: read          # C1: read-only, no secrets in this untrusted-build job
@@ -32,8 +32,8 @@ jobs:
           python3 -m pip install --upgrade pip pyyaml   # build_source_tree.py needs PyYAML
           # Engine lives in the SWHAP/swhap-automation monorepo under
           # engine/. Pin a tag before production (C5); @main shown for now:
-          pip install "swhap-core @ git+https://github.com/SWHAP/swhap-automation@main#subdirectory=engine/swhap-core"
-          pip install "swhap-validate @ git+https://github.com/SWHAP/swhap-automation@main#subdirectory=engine/tools/validator"
+          pip install "swhap-core @ git+https://github.com/mathfichen/swhap-automation-test@swhap-compliance#subdirectory=engine/swhap-core"
+          pip install "swhap-validate @ git+https://github.com/mathfichen/swhap-automation-test@swhap-compliance#subdirectory=engine/tools/validator"
 
       - name: Inspect uploaded archives (read-only rejection rules)
         run: |
@@ -51,6 +51,7 @@ jobs:
           # build_source_tree.py reads the recipe and drives extract_any.py per tree.
           # Open seam: fold extraction into the engine as `swhap extract` (BACKLOG S1).
           python3 scripts/build_source_tree.py --recipe metadata/extraction-recipe.yaml
+
 
       - name: Build candidate on the runner (local only, nothing pushed)
         id: build
@@ -86,6 +87,7 @@ jobs:
 
           json.dump({"SourceCode": commits}, open("repo-snapshot.json", "w"), indent=2)
           EOF
+            
 
       - name: Compliance gate (TF / BP / CSV / CM / SZ / PI) — RED FAILS
         run: |
